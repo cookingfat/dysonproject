@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Scene, Upgrade, Resources, ResourceType, Research, Stats, ActiveBoost, AnyAbility, ClickableEventConfig } from './types';
+import { Scene, Upgrade, Resources, ResourceType, Stats, ActiveBoost } from './types';
 import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG } from './constants';
 import { ACHIEVEMENTS_CONFIG } from './achievements';
 import { ABILITIES_CONFIG, RANDOM_EVENTS_CONFIG, CLICKABLE_EVENTS_CONFIG } from './events';

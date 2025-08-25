@@ -8,7 +8,7 @@ interface ClickerProps {
 const Clicker: React.FC<ClickerProps> = ({ onClick, clickBonus }) => {
   const [effects, setEffects] = useState<{ id: number, bonus: number }[]>([]);
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = () => {
     onClick();
 
     const newEffect = { id: Date.now(), bonus: clickBonus };

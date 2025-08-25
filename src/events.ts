@@ -1,4 +1,4 @@
-import { AnyAbility, RandomEvent, ResourceType, ClickableEventConfig } from './types';
+import { AnyAbility, RandomEvent, ClickableEventConfig } from './types';
 
 export const ABILITIES_CONFIG: AnyAbility[] = [
     {
