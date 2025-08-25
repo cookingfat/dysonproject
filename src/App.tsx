@@ -46,6 +46,8 @@ const App: React.FC = () => {
   const [activeClickable, setActiveClickable] = useState<ClickableEventInstance | null>(null);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
   const [volume, setVolume] = useState({ master: 0.8, music: 0.5, sfx: 0.7 });
+  const [calculatedPPS, setCalculatedPPS] = useState<Record<string, Partial<Resources>>>({}); // Production Per Second (per unit)
+  const [calculatedCPS, setCalculatedCPS] = useState<Record<string, Partial<Resources>>>({}); // Consumption Per Second (per unit)
   const isLoaded = useRef(false);
   const gameTickCallback = useRef<() => void>(() => {});
 
@@ -216,6 +218,62 @@ const App: React.FC = () => {
     setBonuses(newBonuses);
   }, [completedResearch, activeBoosts]);
 
+  // Effect to pre-calculate production/consumption for UI display and game tick
+  useEffect(() => {
+    const newPPS: Record<string, Partial<Resources>> = {};
+    const newCPS: Record<string, Partial<Resources>> = {};
+
+    const prestigeBonus = bonuses.prestige / 100;
+    const globalProductionMultiplier = 1 + (prestigePoints * prestigeBonus);
+
+    upgrades.forEach(u => {
+        // --- Production Calculation (per unit) ---
+        let researchMultiplier = bonuses.production.get('all') || 1;
+        researchMultiplier *= bonuses.production.get(u.id) || 1;
+        if (u.tags) u.tags.forEach(tag => { researchMultiplier *= (bonuses.production.get(tag) || 1); });
+
+        let boostMultiplier = 1;
+        activeBoosts.forEach(boost => {
+            if (boost.type !== 'production_multiplier') return;
+            const isTagTarget = u.tags?.includes(boost.target);
+            const isIdTarget = u.id === boost.target;
+            if(isTagTarget || isIdTarget) {
+                boostMultiplier *= boost.value;
+            }
+        });
+        
+        const levelBonus = 1 + (u.level - 1) * 0.1; // +10% per level
+
+        const unitProduction: Partial<Resources> = {};
+        Object.entries(u.production).forEach(([res, amount]) => {
+            unitProduction[res as ResourceType] = amount * researchMultiplier * globalProductionMultiplier * boostMultiplier * levelBonus;
+        });
+        newPPS[u.id] = unitProduction;
+
+        // --- Consumption Calculation (per unit) ---
+        let consumptionMultiplier = bonuses.consumption.get('all') || 1;
+        consumptionMultiplier *= bonuses.consumption.get(u.id) || 1;
+        if (u.tags) u.tags.forEach(tag => { consumptionMultiplier *= (bonuses.consumption.get(tag) || 1); });
+        
+        activeBoosts.forEach(boost => {
+            if (boost.type !== 'consumption_multiplier') return;
+            const isTagTarget = u.tags?.includes(boost.target);
+            if(boost.target === 'all' || isTagTarget || u.id === boost.target) {
+                consumptionMultiplier *= boost.value;
+            }
+        });
+
+        const unitConsumption: Partial<Resources> = {};
+        Object.entries(u.consumption).forEach(([res, amount]) => {
+            unitConsumption[res as ResourceType] = amount * consumptionMultiplier;
+        });
+        newCPS[u.id] = unitConsumption;
+    });
+
+    setCalculatedPPS(newPPS);
+    setCalculatedCPS(newCPS);
+  }, [upgrades, bonuses, prestigePoints, activeBoosts]);
+
   // Define the game tick logic.
   useEffect(() => {
     gameTickCallback.current = () => {
@@ -231,33 +289,17 @@ const App: React.FC = () => {
         }
 
         const productionFromUpgrade = new Map<string, Partial<Resources>>();
-        const prestigeBonus = bonuses.prestige / 100;
-        const globalProductionMultiplier = 1 + (prestigePoints * prestigeBonus);
 
         // Pass 1: Base production with bonuses
         upgrades.forEach(u => {
             if (u.owned <= 0) return;
-            const finalUnitProduction = { ...(u.production) };
-            let researchMultiplier = bonuses.production.get('all') || 1;
-            researchMultiplier *= bonuses.production.get(u.id) || 1;
-            if (u.tags) u.tags.forEach(tag => { researchMultiplier *= (bonuses.production.get(tag) || 1); });
-
-            let boostMultiplier = 1;
-            activeBoosts.forEach(boost => {
-                if (boost.type !== 'production_multiplier') return;
-                const isTagTarget = u.tags?.includes(boost.target);
-                const isIdTarget = u.id === boost.target;
-                if(isTagTarget || isIdTarget) {
-                    boostMultiplier *= boost.value;
-                }
-            });
             
-            const levelBonus = 1 + (u.level - 1) * 0.1; // +10% per level
-
+            const unitProduction = calculatedPPS[u.id] || {}; // Use pre-calculated value
             const totalProduction: Partial<Resources> = {};
-            Object.entries(finalUnitProduction).forEach(([res, amount]) => {
-                totalProduction[res as ResourceType] = amount * u.owned * researchMultiplier * globalProductionMultiplier * boostMultiplier * levelBonus;
+            Object.entries(unitProduction).forEach(([res, amount]) => {
+                totalProduction[res as ResourceType] = (amount ?? 0) * u.owned;
             });
+
             productionFromUpgrade.set(u.id, totalProduction);
         });
 
@@ -293,19 +335,9 @@ const App: React.FC = () => {
 
         upgrades.forEach(u => {
             if (u.owned > 0) {
-                let consumptionMultiplier = bonuses.consumption.get('all') || 1;
-                consumptionMultiplier *= bonuses.consumption.get(u.id) || 1;
-                if (u.tags) u.tags.forEach(tag => { consumptionMultiplier *= (bonuses.consumption.get(tag) || 1); });
-                
-                activeBoosts.forEach(boost => {
-                    if (boost.type !== 'consumption_multiplier') return;
-                    const isTagTarget = u.tags?.includes(boost.target);
-                    if(boost.target === 'all' || isTagTarget || u.id === boost.target) {
-                        consumptionMultiplier *= boost.value;
-                    }
-                });
+                const unitConsumption = calculatedCPS[u.id] || {};
+                const canAfford = Object.entries(unitConsumption).every(([res, amount]) => resources[res as ResourceType] >= (amount! * u.owned) / 10);
 
-                const canAfford = Object.entries(u.consumption).every(([res, amount]) => resources[res as ResourceType] >= (amount * u.owned * consumptionMultiplier) / 10);
                 if (canAfford) {
                     activeUpgradesThisTick.add(u.id);
                     const upgradeProduction = productionFromUpgrade.get(u.id) || {};
@@ -314,8 +346,8 @@ const App: React.FC = () => {
                         const statKey = `total_${res}`;
                         totalProductionThisTick[statKey] = (totalProductionThisTick[statKey] || 0) + amount / 10;
                     });
-                    Object.entries(u.consumption).forEach(([res, amount]) => {
-                        netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) - (amount * u.owned * consumptionMultiplier) / 10;
+                    Object.entries(unitConsumption).forEach(([res, amount]) => {
+                        netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) - (amount! * u.owned) / 10;
                     });
                 }
             }
@@ -357,7 +389,7 @@ const App: React.FC = () => {
         for (const key in netChangePerTick) newRps[key as ResourceType] = (netChangePerTick[key as ResourceType] ?? 0) * 10;
         setRps(newRps);
     }
-  }, [resources, upgrades, bonuses, prestigePoints, activeBoosts, stats.sra_progress]);
+  }, [resources, upgrades, bonuses, prestigePoints, activeBoosts, stats.sra_progress, calculatedPPS, calculatedCPS]);
 
   // Main game loop timer.
   useEffect(() => {
@@ -712,6 +744,8 @@ const App: React.FC = () => {
           cooldowns={cooldowns}
           onActivateAbility={handleActivateAbility}
           onOpenOptions={() => setIsOptionsOpen(true)}
+          calculatedPPS={calculatedPPS}
+          calculatedCPS={calculatedCPS}
         />
       )}
     </div>

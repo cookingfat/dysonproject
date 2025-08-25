@@ -29,6 +29,8 @@ interface GameUIProps {
   cooldowns: Record<string, number>;
   onActivateAbility: (abilityId: string) => void;
   onOpenOptions: () => void;
+  calculatedPPS: Record<string, Partial<Resources>>;
+  calculatedCPS: Record<string, Partial<Resources>>;
 }
 
 const TabButton: React.FC<{ name: string; active: boolean; onClick: () => void }> = ({ name, active, onClick }) => (
@@ -52,7 +54,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
   const { 
       resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, onResourceClick, 
       onBuyUpgrade, onLevelUpUpgrade, onBuyResearch, dysonFragments, clickBonus, prestigePoints, prestigeBonusPerPoint, 
-      onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions
+      onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions, calculatedPPS, calculatedCPS
   } = props;
   const [activeTab, setActiveTab] = useState<'upgrades' | 'research' | 'achievements'>('upgrades');
   const hasResearchLab = upgrades.some(u => u.id === 'research_lab' && u.owned > 0);
@@ -126,6 +128,8 @@ const GameUI: React.FC<GameUIProps> = (props) => {
                     unlockedUpgrades={unlockedUpgrades}
                     onBuy={onBuyUpgrade}
                     onLevelUp={onLevelUpUpgrade}
+                    calculatedPPS={calculatedPPS}
+                    calculatedCPS={calculatedCPS}
                 />
             )}
             {activeTab === 'research' && hasResearchLab && (

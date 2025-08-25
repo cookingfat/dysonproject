@@ -7,6 +7,8 @@ interface UpgradeItemProps {
   onBuy: (upgradeId: string) => void;
   onLevelUp: (upgradeId: string) => void;
   allUpgrades: Upgrade[];
+  calculatedPPS: Record<string, Partial<Resources>>;
+  calculatedCPS: Record<string, Partial<Resources>>;
 }
 
 const formatNumber = (num: number) => {
@@ -28,7 +30,7 @@ const RomanNumerals: { [key: number]: string } = {
     1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V', 6: 'VI', 7: 'VII', 8: 'VIII', 9: 'IX', 10: 'X'
 };
 
-const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, onLevelUp, allUpgrades }) => {
+const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, onLevelUp, allUpgrades, calculatedPPS, calculatedCPS }) => {
   const canAffordBuy = Object.entries(upgrade.cost).every(([res, amount]) => {
     return resources[res as ResourceType] >= amount;
   });
@@ -50,12 +52,14 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, on
   const canAffordLevelUp = Object.entries(levelUpCost).every(([res, amt]) => resources[res as ResourceType] >= (amt || 0));
 
 
-  const productionText = Object.entries(upgrade.production)
-    .map(([res, amount]) => `▲ +${amount.toFixed(1)} ${res}/s`)
+  const unitProduction = calculatedPPS[upgrade.id] || upgrade.production;
+  const productionText = Object.entries(unitProduction)
+    .map(([res, amount]) => `▲ +${(amount ?? 0).toFixed(2)} ${res}/s`)
     .join(', ');
-    
-  const consumptionText = Object.entries(upgrade.consumption)
-    .map(([res, amount]) => `▼ -${amount.toFixed(1)} ${res}/s`)
+
+  const unitConsumption = calculatedCPS[upgrade.id] || upgrade.consumption;
+  const consumptionText = Object.entries(unitConsumption)
+    .map(([res, amount]) => `▼ -${(amount ?? 0).toFixed(2)} ${res}/s`)
     .join(', ');
 
   const canAffordAnything = canAffordBuy || canAffordLevelUp;
