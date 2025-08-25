@@ -7,7 +7,7 @@ class SoundManager {
     private currentTrackIndex = -1;
 
     private masterVolume = 0.8;
-    private musicVolume = 0.5;
+    private musicVolume = 0.3;
     private sfxVolume = 0.7;
     
     private isMusicPlaying = false;
