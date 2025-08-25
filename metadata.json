@@ -1,0 +1,5 @@
+{
+  "name": "Project Dyson",
+  "description": "An idle/factory-style browser game. Click to generate energy, buy upgrades to automate production, and build a Dyson Sphere!",
+  "requestFramePermissions": []
+}

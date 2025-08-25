@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #0A0F1E;
+  --color-primary: #00E5FF; /* Cyan */
+  --color-accent: #9E00FF; /* Purple */
+  --color-positive: #00FF87; /* Green */
+  --color-negative: #FF4D00; /* Orange-Red */
+  --font-body: 'Exo 2', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents whole-page scroll */
+  font-family: var(--font-body);
+  color: #E0E0E0;
+}
+body {
+  background: var(--color-bg);
+}
+.stars, .stars2, .stars3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.stars {
+  background-image: radial-gradient(ellipse at top, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 40%);
+  animation: star-glow 10s ease-in-out infinite;
+}
+ .stars2 {
+  background: transparent url('https://www.script-tutorials.com/demos/360/images/twinkling.png') repeat top center;
+  animation: move-twink-back 200s linear infinite;
+}
+.stars3 {
+  background: transparent url('https://www.script-tutorials.com/demos/360/images/stars.png') repeat top center;
+  animation: move-twink-back 250s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes star-glow {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; }
+}
+@keyframes move-twink-back {
+    from {background-position:0 0;}
+    to {background-position:-10000px 5000px;}
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(1.5);
+  }
+}
+.animate-float-up {
+  animation: float-up 1s ease-out forwards;
+  pointer-events: none;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+
+@keyframes slide-in-out {
+  0% {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+  15% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  85% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+}
+.animate-notification {
+  animation: slide-in-out 4s ease-in-out forwards;
+}
+
+.clip-corner {
+  clip-path: polygon(0% 12px, 12px 0%, 100% 0%, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0% 100%);
+}
+.clip-corner-sm {
+  clip-path: polygon(0% 8px, 8px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%);
+}
+.glow-cyan-lg {
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.1);
+}
+.glow-purple-md {
+    box-shadow: 0 0 20px rgba(158, 0, 255, 0.3), inset 0 0 15px rgba(158, 0, 255, 0.1);
+}
+
+@keyframes pulse-strong {
+  0% { transform: translate(-50%, -50%) scale(0.95) rotate(-5deg); box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.7); }
+  70% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); box-shadow: 0 0 10px 20px rgba(255, 255, 0, 0); }
+  100% { transform: translate(-50%, -50%) scale(0.95) rotate(-5deg); box-shadow: 0 0 0 0 rgba(255, 255, 0, 0); }
+}
+.animate-pulse-strong {
+  animation-name: pulse-strong;
+}
+
+@keyframes pulse-glow-cyan {
+    0%, 100% { border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
+    50% { border-color: rgba(0, 229, 255, 0.8); box-shadow: 0 0 20px rgba(0, 229, 255, 0.4); }
+}
+
+.can-afford-pulse {
+    animation: pulse-glow-cyan 2.5s ease-in-out infinite;
+}
+
+/* Custom Range Slider Styles */
+.range-cyan::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 0 5px var(--color-primary);
+  margin-top: -7px; /* Align thumb with track */
+}
+
+.range-cyan::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--color-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 0 5px var(--color-primary);
+}
