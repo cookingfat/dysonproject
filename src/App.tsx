@@ -484,6 +484,7 @@ const App: React.FC = () => {
   const handleStartGame = useCallback(() => setScene('game'), []);
 
   const handleResourceClick = useCallback(() => {
+    soundManager.playMusic(); // Attempt to start music on first click as a fallback
     soundManager.playSoundEffect('click');
     const clickAmount = 1 * bonuses.click;
     setResources(prev => ({ ...prev, ore: prev.ore + clickAmount }));
