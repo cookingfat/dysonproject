@@ -8,9 +8,11 @@ interface UpgradeShopProps {
   unlockedUpgrades: Set<string>;
   onBuy: (upgradeId: string) => void;
   onLevelUp: (upgradeId: string) => void;
+  calculatedPPS: Record<string, Partial<Resources>>;
+  calculatedCPS: Record<string, Partial<Resources>>;
 }
 
-const UpgradeShop: React.FC<UpgradeShopProps> = ({ upgrades, resources, onBuy, onLevelUp, unlockedUpgrades }) => {
+const UpgradeShop: React.FC<UpgradeShopProps> = ({ upgrades, resources, onBuy, onLevelUp, unlockedUpgrades, calculatedPPS, calculatedCPS }) => {
   const visibleUpgrades = upgrades.filter(u => unlockedUpgrades.has(u.id));
 
   return (
@@ -25,6 +27,8 @@ const UpgradeShop: React.FC<UpgradeShopProps> = ({ upgrades, resources, onBuy, o
             onBuy={onBuy}
             onLevelUp={onLevelUp}
             allUpgrades={upgrades}
+            calculatedPPS={calculatedPPS}
+            calculatedCPS={calculatedCPS}
           />
         ))}
         {visibleUpgrades.length === 0 && (
