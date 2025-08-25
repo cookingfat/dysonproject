@@ -173,6 +173,18 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     consumption: { energy: 100, parts: 10 },
     owned: 0,
     level: 1,
+    synergies: [
+      {
+        sourceId: 'self_replicating_assembler',
+        targetStat: 'production',
+        targetResource: 'dyson_fragments',
+        bonus: {
+          type: 'flat',
+          value: 0.01, // +0.01 fragments/sec per Assembler
+          per: 1,
+        }
+      }
+    ]
   },
   {
     id: 'drone_bay',
@@ -219,7 +231,7 @@ export const UPGRADES_CONFIG: Upgrade[] = [
   {
     id: 'self_replicating_assembler',
     name: 'Self-Replicating Assembler',
-    description: 'An autonomous factory that consumes parts to slowly build more of itself.',
+    description: 'An autonomous factory that consumes parts to slowly build more of itself. Each assembler boosts the output of all Part Fabricators.',
     unlocksAt: { owned: { fusion_reactor: 1 } },
     baseCost: { parts: 10000, dyson_fragments: 20, energy: 0, ore: 0, research_points: 0 },
     cost: { parts: 10000, dyson_fragments: 20, energy: 0, ore: 0, research_points: 0 },
