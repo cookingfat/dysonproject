@@ -8,6 +8,8 @@ export const INITIAL_RESOURCES: Resources = {
   research_points: 0,
 };
 
+export const DYSON_SPHERE_GOAL = 1_000_000;
+
 // The initial configuration for all available upgrades in the game.
 export const UPGRADES_CONFIG: Upgrade[] = [
   {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Scene, Upgrade, Resources, ResourceType, Stats, ActiveBoost } from './types';
-import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG } from './constants';
+import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG, DYSON_SPHERE_GOAL } from './constants';
 import { ACHIEVEMENTS_CONFIG } from './achievements';
 import { ABILITIES_CONFIG, RANDOM_EVENTS_CONFIG, CLICKABLE_EVENTS_CONFIG } from './events';
 import MainMenu from './components/MainMenu';
@@ -8,6 +8,7 @@ import GameUI from './components/GameUI';
 import OfflineProgressModal from './components/OfflineProgressModal';
 import ClickableEvent, { ClickableEventInstance } from './components/ClickableEvent';
 import OptionsMenu from './components/OptionsMenu';
+import VictoryScreen from './components/VictoryScreen';
 import { soundManager, SfxType } from './soundManager';
 
 
@@ -48,6 +49,7 @@ const App: React.FC = () => {
   const [volume, setVolume] = useState({ master: 0.8, music: 0.5, sfx: 0.7 });
   const [calculatedPPS, setCalculatedPPS] = useState<Record<string, Partial<Resources>>>({}); // Production Per Second (per unit)
   const [calculatedCPS, setCalculatedCPS] = useState<Record<string, Partial<Resources>>>({}); // Consumption Per Second (per unit)
+  const [victoryAcknowledged, setVictoryAcknowledged] = useState(false);
   const isLoaded = useRef(false);
   const gameTickCallback = useRef<() => void>(() => {});
 
@@ -105,6 +107,7 @@ const App: React.FC = () => {
         if (savedData.prestigePoints) setPrestigePoints(savedData.prestigePoints);
         if (savedData.stats) setStats(savedData.stats);
         if (savedData.cooldowns) setCooldowns(savedData.cooldowns);
+        if (savedData.victoryAcknowledged) setVictoryAcknowledged(savedData.victoryAcknowledged);
         if (savedData.volume) {
             if(typeof savedData.volume.master === 'number' && typeof savedData.volume.music === 'number' && typeof savedData.volume.sfx === 'number') {
                 setVolume(savedData.volume);
@@ -152,13 +155,14 @@ const App: React.FC = () => {
         rps,
         cooldowns,
         volume,
+        victoryAcknowledged,
         lastSaveTime: Date.now(),
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(dataToSave));
     }, 5000);
 
     return () => clearInterval(saveInterval);
-  }, [resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, prestigePoints, stats, rps, cooldowns, volume]);
+  }, [resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, prestigePoints, stats, rps, cooldowns, volume, victoryAcknowledged]);
   
   // Effect to handle starting music
   useEffect(() => {
@@ -617,6 +621,7 @@ const App: React.FC = () => {
     setUpgrades(UPGRADES_CONFIG);
     setUnlockedUpgrades(new Set(['auto_miner']));
     setCompletedResearch(new Set());
+    setVictoryAcknowledged(false);
     addNotification(`Prestiged for ${fragmentsToBank} bonus points!`);
   }, [resources.dyson_fragments, addNotification]);
 
@@ -715,6 +720,8 @@ const App: React.FC = () => {
   const handleVolumeChange = useCallback((type: 'master' | 'music' | 'sfx', value: number) => {
       setVolume(prev => ({...prev, [type]: value }));
   }, []);
+  
+  const hasWon = resources.dyson_fragments >= DYSON_SPHERE_GOAL;
 
   return (
     <div className="h-full w-full text-white font-sans relative">
@@ -722,6 +729,8 @@ const App: React.FC = () => {
       {offlineGains && <OfflineProgressModal gains={offlineGains} onClose={handleCloseOfflineModal} />}
       {activeClickable && <ClickableEvent event={activeClickable} onClick={handleClickableEvent} />}
       {isOptionsOpen && <OptionsMenu onClose={() => setIsOptionsOpen(false)} volume={volume} onVolumeChange={handleVolumeChange} />}
+      {hasWon && !victoryAcknowledged && <VictoryScreen onContinue={() => setVictoryAcknowledged(true)} onPrestige={handlePrestige} />}
+      
       {scene === 'menu' && <MainMenu onStartGame={handleStartGame} onOpenOptions={() => setIsOptionsOpen(true)} />}
       {scene === 'game' && (
         <GameUI 
@@ -746,6 +755,7 @@ const App: React.FC = () => {
           onOpenOptions={() => setIsOptionsOpen(true)}
           calculatedPPS={calculatedPPS}
           calculatedCPS={calculatedCPS}
+          goal={DYSON_SPHERE_GOAL}
         />
       )}
     </div>
