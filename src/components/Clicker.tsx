@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 interface ClickerProps {
   onClick: () => void;
   clickBonus: number;
+  isBoosted?: boolean;
 }
 
-const Clicker: React.FC<ClickerProps> = ({ onClick, clickBonus }) => {
+const Clicker: React.FC<ClickerProps> = ({ onClick, clickBonus, isBoosted }) => {
   const [effects, setEffects] = useState<{ id: number, bonus: number }[]>([]);
 
   const handleClick = () => {
@@ -23,14 +24,15 @@ const Clicker: React.FC<ClickerProps> = ({ onClick, clickBonus }) => {
     <div className="w-full flex items-center justify-center py-4">
       <button
         onClick={handleClick}
-        className="relative w-48 h-48 bg-cyan-600 rounded-full text-white font-black text-3xl uppercase tracking-wider
+        className={`relative w-48 h-48 bg-cyan-600 rounded-full text-white font-black text-3xl uppercase tracking-wider
                    flex items-center justify-center
                    shadow-lg shadow-cyan-500/30
                    transition-all duration-150 ease-in-out
                    border-4 border-cyan-400
                    hover:bg-cyan-500 hover:shadow-xl hover:shadow-cyan-400/50 hover:scale-105
                    active:scale-95 active:bg-cyan-700
-                   overflow-hidden"
+                   overflow-hidden
+                   ${isBoosted ? 'animate-pulse-gold' : ''}`}
         aria-label={`Mine ${clickBonus} ore`}
       >
         Mine Ore

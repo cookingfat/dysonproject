@@ -34,6 +34,7 @@ interface GameUIProps {
   calculatedCPS: Record<string, Partial<Resources>>;
   goal: number;
   resourceFlash: Set<ResourceType>;
+  isRichVeinActive: boolean;
 }
 
 const TabButton: React.FC<{ name: string; active: boolean; onClick: () => void }> = ({ name, active, onClick }) => (
@@ -57,7 +58,8 @@ const GameUI: React.FC<GameUIProps> = (props) => {
   const { 
       resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, onResourceClick, 
       onBuyUpgrade, onLevelUpUpgrade, onBuyResearch, dysonFragments, clickBonus, prestigePoints, prestigeBonusPerPoint, 
-      onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions, calculatedPPS, calculatedCPS, goal, resourceFlash
+      onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions, calculatedPPS, calculatedCPS, goal, resourceFlash,
+      isRichVeinActive
   } = props;
   const [activeTab, setActiveTab] = useState<'upgrades' | 'research' | 'achievements'>('upgrades');
   const hasResearchLab = upgrades.some(u => u.id === 'research_lab' && u.owned > 0);
@@ -93,10 +95,10 @@ const GameUI: React.FC<GameUIProps> = (props) => {
       
       <main className="flex-grow min-h-0 grid grid-cols-1 md:grid-cols-3 gap-4 overflow-hidden">
         {/* Left Panel */}
-        <div className="md:col-span-1 bg-black/30 backdrop-blur-sm p-4 rounded-md shadow-lg border border-gray-700/50 flex flex-col gap-4 clip-corner overflow-hidden">
+        <div className="md:col-span-1 bg-black/30 backdrop-blur-sm p-4 rounded-md shadow-lg border border-gray-700/50 flex flex-col gap-4 clip-corner">
           {/* Non-scrolling part: flex-shrink-0 ensures it doesn't get squished */}
           <div className="flex-shrink-0">
-              <Clicker onClick={onResourceClick} clickBonus={clickBonus} />
+              <Clicker onClick={onResourceClick} clickBonus={clickBonus} isBoosted={isRichVeinActive} />
           </div>
 
           {/* Scrolling part: flex-grow takes remaining space, overflow-y-auto enables scrolling */}

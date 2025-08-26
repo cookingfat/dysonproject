@@ -743,6 +743,7 @@ const App: React.FC = () => {
   }, []);
   
   const hasWon = resources.dyson_fragments >= DYSON_SPHERE_GOAL;
+  const isRichVeinActive = activeBoosts.some(b => b.sourceId === 'rich_vein');
 
   return (
     <div className="h-full w-full text-white font-sans relative">
@@ -778,6 +779,7 @@ const App: React.FC = () => {
           calculatedCPS={calculatedCPS}
           goal={DYSON_SPHERE_GOAL}
           resourceFlash={resourceFlash}
+          isRichVeinActive={isRichVeinActive}
         />
       )}
     </div>

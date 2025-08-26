@@ -181,9 +181,14 @@ body {
 
 /* Visual Cues for Abilities */
 @keyframes resource-flash {
-  0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
-  50% { box-shadow: 0 0 20px 5px rgba(0, 229, 255, 0.7); }
-  100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
+    border-color: rgb(55 65 81 / 0.5); /* Tailwind gray-700/50 */
+  }
+  50% {
+    box-shadow: 0 0 20px 5px rgba(0, 229, 255, 0.7);
+    border-color: var(--color-primary);
+  }
 }
 .animate-flash {
   animation: resource-flash 1s ease-in-out;
@@ -203,4 +208,18 @@ body {
 }
 .animate-glow-efficiency {
   animation: rate-glow-efficiency 2s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+  0%, 100% {
+    border-color: #FBBF24; /* amber-400 */
+    box-shadow: 0 0 10px #FBBF24, inset 0 0 5px #FBBF24, 0 0 15px rgba(0,0,0,0.5);
+  }
+  50% {
+    border-color: #F59E0B; /* amber-500 */
+    box-shadow: 0 0 25px #F59E0B, inset 0 0 10px #F59E0B, 0 0 15px rgba(0,0,0,0.5);
+  }
+}
+.animate-pulse-gold {
+  animation: pulse-gold 1.5s ease-in-out infinite;
 }
