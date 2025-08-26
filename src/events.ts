@@ -78,12 +78,12 @@ export const CLICKABLE_EVENTS_CONFIG: ClickableEventConfig[] = [
     {
         id: 'rich_vein',
         name: 'Rich Vein',
-        description: 'A rich vein of ore! Clicks are 10x more powerful for 20 seconds.',
+        description: 'A rich vein of ore! Clicks are 1000x more powerful for 20 seconds.',
         duration: 20, // boost duration
         lifespan: 10, // time on screen
         boost: {
             type: 'click_multiplier',
-            value: 10
+            value: 1000
         }
     }
 ];

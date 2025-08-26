@@ -149,3 +149,58 @@ body {
   border: 2px solid var(--color-bg);
   box-shadow: 0 0 5px var(--color-primary);
 }
+
+/* Custom Tooltip Styles */
+.custom-tooltip {
+  @apply absolute z-50 px-3 py-2 text-sm text-center font-semibold text-white bg-[#0A0F1E] rounded-md shadow-lg
+         opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out
+         pointer-events-none w-max max-w-xs backdrop-blur-sm bg-opacity-90;
+  border: 1px solid var(--color-primary);
+}
+
+.custom-tooltip-arrow {
+  @apply absolute w-2 h-2 rotate-45;
+  background-color: var(--color-bg);
+}
+.custom-tooltip-arrow[class*="-bottom-"] {
+    border-left: 1px solid var(--color-primary);
+    border-top: 1px solid var(--color-primary);
+}
+.custom-tooltip-arrow[class*="-top-"] {
+    border-right: 1px solid var(--color-primary);
+    border-bottom: 1px solid var(--color-primary);
+}
+.custom-tooltip-arrow[class*="-left-"] {
+    border-top: 1px solid var(--color-primary);
+    border-right: 1px solid var(--color-primary);
+}
+.custom-tooltip-arrow[class*="-right-"] {
+    border-bottom: 1px solid var(--color-primary);
+    border-left: 1px solid var(--color-primary);
+}
+
+/* Visual Cues for Abilities */
+@keyframes resource-flash {
+  0% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+  50% { box-shadow: 0 0 20px 5px rgba(0, 229, 255, 0.7); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+}
+.animate-flash {
+  animation: resource-flash 1s ease-in-out;
+}
+
+@keyframes rate-glow-production {
+  0%, 100% { text-shadow: 0 0 4px var(--color-positive); }
+  50% { text-shadow: 0 0 12px var(--color-positive), 0 0 15px var(--color-positive); }
+}
+.animate-glow-production {
+  animation: rate-glow-production 2s ease-in-out infinite;
+}
+
+@keyframes rate-glow-efficiency {
+  0%, 100% { text-shadow: 0 0 4px var(--color-primary); }
+  50% { text-shadow: 0 0 12px var(--color-primary), 0 0 15px var(--color-primary); }
+}
+.animate-glow-efficiency {
+  animation: rate-glow-efficiency 2s ease-in-out infinite;
+}

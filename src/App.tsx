@@ -50,6 +50,7 @@ const App: React.FC = () => {
   const [calculatedPPS, setCalculatedPPS] = useState<Record<string, Partial<Resources>>>({}); // Production Per Second (per unit)
   const [calculatedCPS, setCalculatedCPS] = useState<Record<string, Partial<Resources>>>({}); // Consumption Per Second (per unit)
   const [victoryAcknowledged, setVictoryAcknowledged] = useState(false);
+  const [resourceFlash, setResourceFlash] = useState<Set<ResourceType>>(new Set());
   const isLoaded = useRef(false);
   const gameTickCallback = useRef<() => void>(() => {});
 
@@ -497,8 +498,8 @@ const App: React.FC = () => {
       const eventInterval = setInterval(() => {
           if (activeClickable) return;
 
-          // ~2% chance every 4 seconds -> one every ~3.3 minutes
-          if (Math.random() < 0.02) {
+          // ~3.5% chance every 4 seconds -> one every ~1.9 minutes
+          if (Math.random() < 0.035) {
               const eventConfig = CLICKABLE_EVENTS_CONFIG[Math.floor(Math.random() * CLICKABLE_EVENTS_CONFIG.length)];
               
               const newClickable: ClickableEventInstance = {
@@ -696,6 +697,26 @@ const App: React.FC = () => {
             }
             return newRes;
         });
+        
+        const resourcesToFlash = new Set<ResourceType>();
+        if (ability.gain) {
+            (Object.keys(ability.gain) as ResourceType[]).forEach(res => resourcesToFlash.add(res));
+        }
+        if (ability.gainSeconds) {
+            (Object.keys(ability.gainSeconds) as ResourceType[]).forEach(res => resourcesToFlash.add(res));
+        }
+
+        if (resourcesToFlash.size > 0) {
+            setResourceFlash(prev => new Set([...prev, ...resourcesToFlash]));
+            setTimeout(() => {
+                setResourceFlash(prev => {
+                    const newSet = new Set(prev);
+                    resourcesToFlash.forEach(res => newSet.delete(res));
+                    return newSet;
+                });
+            }, 1000); // Corresponds to animation duration
+        }
+        
         addNotification(`${ability.name} activated!`);
     } else if (ability.type === 'timed_boost') {
         const timedAbility = ability;
@@ -756,6 +777,7 @@ const App: React.FC = () => {
           calculatedPPS={calculatedPPS}
           calculatedCPS={calculatedCPS}
           goal={DYSON_SPHERE_GOAL}
+          resourceFlash={resourceFlash}
         />
       )}
     </div>

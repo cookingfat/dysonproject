@@ -1,4 +1,5 @@
 import React from 'react';
+import Tooltip from './Tooltip';
 
 interface GoalProgressProps {
   current: number;
@@ -16,16 +17,18 @@ const GoalProgress: React.FC<GoalProgressProps> = ({ current, goal }) => {
             {current.toLocaleString(undefined, { maximumFractionDigits: 0 })} / {goal.toLocaleString()}
         </p>
       </div>
-      <div className="w-full bg-black/50 rounded-full h-4 border border-purple-800/50 overflow-hidden" title={`${progressPercentage.toFixed(2)}% Complete`}>
-        <div
-          className="bg-purple-500 h-full rounded-full transition-all duration-300 ease-in-out"
-          style={{ width: `${progressPercentage}%` }}
-          aria-valuenow={progressPercentage}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          role="progressbar"
-        ></div>
-      </div>
+      <Tooltip content={`${progressPercentage.toFixed(2)}% Complete`} position="bottom">
+        <div className="w-full bg-black/50 rounded-full h-4 border border-purple-800/50 overflow-hidden">
+          <div
+            className="bg-purple-500 h-full rounded-full transition-all duration-300 ease-in-out"
+            style={{ width: `${progressPercentage}%` }}
+            aria-valuenow={progressPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            role="progressbar"
+          ></div>
+        </div>
+      </Tooltip>
     </div>
   );
 };

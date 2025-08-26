@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Resources, ActiveBoost, AnyAbility } from '../types';
 import { ABILITIES_CONFIG } from '../events';
+import Tooltip from './Tooltip';
 
 interface EventsManagerProps {
     activeBoosts: ActiveBoost[];
@@ -78,23 +79,23 @@ const EventsManager: React.FC<EventsManagerProps> = ({ activeBoosts, cooldowns, 
                         const coolingDown = isOnCooldown(ability.id);
                         const disabled = !affordable || coolingDown;
                         return (
-                            <button
-                                key={ability.id}
-                                onClick={() => onActivateAbility(ability.id)}
-                                disabled={disabled}
-                                className={`relative p-2 rounded-md text-sm font-bold transition-all overflow-hidden clip-corner-sm h-10
-                                    ${disabled 
-                                        ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                        : 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                            <Tooltip key={ability.id} content={ability.description} position="top">
+                                <button
+                                    onClick={() => onActivateAbility(ability.id)}
+                                    disabled={disabled}
+                                    className={`relative p-2 rounded-md text-sm font-bold transition-all overflow-hidden clip-corner-sm h-10 w-full
+                                        ${disabled 
+                                            ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                            : 'bg-cyan-600 hover:bg-cyan-500 text-white'
+                                        }
+                                    `}
+                                >
+                                    {coolingDown 
+                                        ? <CooldownProgress expiresAt={cooldowns[ability.id]} cooldown={ability.cooldown} />
+                                        : ability.name
                                     }
-                                `}
-                                title={ability.description}
-                            >
-                                {coolingDown 
-                                    ? <CooldownProgress expiresAt={cooldowns[ability.id]} cooldown={ability.cooldown} />
-                                    : ability.name
-                                }
-                            </button>
+                                </button>
+                            </Tooltip>
                         );
                     })}
                 </div>

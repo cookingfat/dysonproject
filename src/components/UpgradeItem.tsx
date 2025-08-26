@@ -18,11 +18,19 @@ const formatNumber = (num: number) => {
   return (num / 1000000000).toFixed(1) + 'B';
 };
 
+const RESOURCE_ICONS: Record<string, string> = {
+    ore: '⛏️',
+    energy: '⚡',
+    parts: '⚙️',
+    dyson_fragments: '🌌',
+    research_points: '🔬',
+};
+
 const ResourceCost: React.FC<{ cost: Partial<Resources> }> = ({ cost }) => {
   const costs = Object.entries(cost)
     .filter(([, amount]) => (amount ?? 0) > 0)
-    .map(([res, amount]) => `${formatNumber(amount!)} ${res.charAt(0).toUpperCase() + res.slice(1)}`)
-    .join(' & ');
+    .map(([res, amount]) => `${formatNumber(amount!)} ${RESOURCE_ICONS[res as ResourceType] || res}`)
+    .join(' ');
   return <>{costs}</>;
 };
 
@@ -111,26 +119,28 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, on
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+      <div className="flex flex-col items-end sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
         {upgrade.owned > 0 && (
             <button
                 onClick={() => onLevelUp(upgrade.id)}
                 disabled={!canAffordLevelUp}
-                className="text-black flex-1 font-bold py-2 px-4 rounded-md transition-all duration-200 clip-corner-sm text-sm
+                className="text-black w-28 h-28 flex-shrink-0 font-bold p-2 rounded-md transition-all duration-200 clip-corner-sm text-sm flex flex-col items-center justify-center text-center
                         disabled:bg-gray-600/50 disabled:cursor-not-allowed disabled:text-gray-500
                         bg-purple-500 hover:bg-purple-400"
                 >
-                Level Up<br/><span className="font-normal text-xs">(<ResourceCost cost={levelUpCost} />)</span>
+                <span>Level Up</span>
+                <span className="font-normal text-xs">(<ResourceCost cost={levelUpCost} />)</span>
             </button>
         )}
         <button
             onClick={() => onBuy(upgrade.id)}
             disabled={!canAffordBuy}
-            className="text-black flex-1 font-bold py-2 px-4 rounded-md transition-all duration-200 clip-corner-sm text-sm
+            className="text-black w-28 h-28 flex-shrink-0 font-bold p-2 rounded-md transition-all duration-200 clip-corner-sm text-sm flex flex-col items-center justify-center text-center
                     disabled:bg-gray-600/50 disabled:cursor-not-allowed disabled:text-gray-500
                     bg-cyan-500 hover:bg-cyan-400"
             >
-            Buy Unit<br/><span className="font-normal text-xs">(<ResourceCost cost={upgrade.cost} />)</span>
+            <span>Buy Unit</span>
+            <span className="font-normal text-xs">(<ResourceCost cost={upgrade.cost} />)</span>
         </button>
       </div>
 

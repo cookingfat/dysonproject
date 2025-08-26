@@ -1,9 +1,12 @@
 import React from 'react';
-import { Resources, ResourceType } from '../types';
+import { Resources, ResourceType, ActiveBoost } from '../types';
+import Tooltip from './Tooltip';
 
 interface ResourceDisplayProps {
   resources: Resources;
   rps: Partial<Resources>; // resources per second
+  resourceFlash: Set<ResourceType>;
+  activeBoosts: ActiveBoost[];
 }
 
 const RESOURCE_METADATA: Record<ResourceType, { name: string, color: string, icon: string }> = {
@@ -14,7 +17,7 @@ const RESOURCE_METADATA: Record<ResourceType, { name: string, color: string, ico
     research_points: { name: 'Research', color: 'text-cyan-300', icon: '🔬' },
 }
 
-const ResourceDisplay: React.FC<ResourceDisplayProps> = ({ resources, rps }) => {
+const ResourceDisplay: React.FC<ResourceDisplayProps> = ({ resources, rps, resourceFlash, activeBoosts }) => {
   // Function to format large numbers
   const formatNumber = (num: number) => {
     if (Math.abs(num) < 1000) return num.toFixed(1);
@@ -44,12 +47,33 @@ const ResourceDisplay: React.FC<ResourceDisplayProps> = ({ resources, rps }) => 
             const resourceAmount = resources[resourceKey];
             const resourceRps = rps[resourceKey] || 0;
             const rpsColor = resourceRps >= 0 ? 'text-green-400' : 'text-red-400';
+            
+            const isFlashing = resourceFlash.has(resourceKey);
+
+            let rpsGlowClass = '';
+            const applicableBoost = activeBoosts.find(boost => {
+                if (boost.target === 'all') return true;
+                if (boost.target === 'miner' && resourceKey === 'ore') return true;
+                if (boost.target === 'power' && resourceKey === 'energy') return true;
+                if (boost.target === 'factory' && ['parts', 'research_points'].includes(resourceKey)) return true;
+                return false;
+            });
+
+            if (applicableBoost) {
+                if (applicableBoost.type === 'production_multiplier') {
+                    rpsGlowClass = 'animate-glow-production';
+                } else if (applicableBoost.type === 'consumption_multiplier') {
+                    rpsGlowClass = 'animate-glow-efficiency';
+                }
+            }
 
             return (
-                <div key={resourceKey} className="bg-black/40 p-3 rounded-md clip-corner-sm border border-gray-700/50">
+                <div key={resourceKey} className={`bg-black/40 p-3 rounded-md clip-corner-sm border border-gray-700/50 ${isFlashing ? 'animate-flash' : ''}`}>
                     <h2 className={`text-lg ${meta.color} font-bold truncate flex items-center justify-center gap-2`}>{meta.icon} {meta.name}</h2>
-                    <p className="text-2xl font-bold text-white my-1 font-mono" title={resourceAmount.toLocaleString()}>{formatPreciseNumber(resourceAmount)}</p>
-                    <p className={`text-sm ${rpsColor} font-mono`}>
+                    <Tooltip content={resourceAmount.toLocaleString()} position="bottom">
+                      <p className="text-2xl font-bold text-white my-1 font-mono">{formatPreciseNumber(resourceAmount)}</p>
+                    </Tooltip>
+                    <p className={`text-sm ${rpsColor} font-mono ${rpsGlowClass}`}>
                         {resourceRps >= 0 ? '+' : ''}{formatNumber(resourceRps)}/s
                     </p>
                 </div>

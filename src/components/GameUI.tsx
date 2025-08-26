@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upgrade, Resources, ActiveBoost } from '../types';
+import { Upgrade, Resources, ActiveBoost, ResourceType } from '../types';
 import ResourceDisplay from './ResourceDisplay';
 import Clicker from './Clicker';
 import UpgradeShop from './UpgradeShop';
@@ -8,6 +8,7 @@ import GoalProgress from './GoalProgress';
 import PrestigeManager from './PrestigeManager';
 import AchievementsView from './AchievementsView';
 import EventsManager from './EventsManager';
+import Tooltip from './Tooltip';
 
 interface GameUIProps {
   resources: Resources;
@@ -32,6 +33,7 @@ interface GameUIProps {
   calculatedPPS: Record<string, Partial<Resources>>;
   calculatedCPS: Record<string, Partial<Resources>>;
   goal: number;
+  resourceFlash: Set<ResourceType>;
 }
 
 const TabButton: React.FC<{ name: string; active: boolean; onClick: () => void }> = ({ name, active, onClick }) => (
@@ -55,7 +57,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
   const { 
       resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, onResourceClick, 
       onBuyUpgrade, onLevelUpUpgrade, onBuyResearch, dysonFragments, clickBonus, prestigePoints, prestigeBonusPerPoint, 
-      onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions, calculatedPPS, calculatedCPS, goal
+      onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions, calculatedPPS, calculatedCPS, goal, resourceFlash
   } = props;
   const [activeTab, setActiveTab] = useState<'upgrades' | 'research' | 'achievements'>('upgrades');
   const hasResearchLab = upgrades.some(u => u.id === 'research_lab' && u.owned > 0);
@@ -64,15 +66,16 @@ const GameUI: React.FC<GameUIProps> = (props) => {
 
   return (
     <div className="h-full w-full max-w-7xl mx-auto flex flex-col p-4 gap-4">
-      <button 
-        onClick={onOpenOptions}
-        className="fixed bottom-4 right-4 z-40 w-14 h-14 bg-gray-800/80 backdrop-blur-sm border-2 border-cyan-500/50 rounded-full text-3xl flex items-center justify-center
-                   hover:bg-cyan-700/80 hover:border-cyan-400 transition-all transform hover:scale-110 hover:rotate-12"
-        aria-label="Open Options"
-        title="Options"
-      >
-        ⚙️
-      </button>
+      <Tooltip content="Options" position="left" className="fixed bottom-4 right-4 z-40">
+        <button 
+          onClick={onOpenOptions}
+          className="w-14 h-14 bg-gray-800/80 backdrop-blur-sm border-2 border-cyan-500/50 rounded-full text-3xl flex items-center justify-center
+                    hover:bg-cyan-700/80 hover:border-cyan-400 transition-all transform hover:scale-110 hover:rotate-12"
+          aria-label="Open Options"
+        >
+          ⚙️
+        </button>
+      </Tooltip>
 
       <header className="flex-shrink-0 grid grid-cols-1 md:grid-cols-2 gap-4">
         <GoalProgress 
@@ -99,7 +102,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
           {/* Scrolling part: flex-grow takes remaining space, overflow-y-auto enables scrolling */}
           <div className="w-full flex-grow overflow-y-auto">
               <div className="flex flex-col gap-4 items-center">
-                  <ResourceDisplay resources={resources} rps={rps} />
+                  <ResourceDisplay resources={resources} rps={rps} resourceFlash={resourceFlash} activeBoosts={activeBoosts} />
                   {abilitiesUnlocked && (
                       <EventsManager 
                           activeBoosts={activeBoosts}
