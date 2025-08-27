@@ -101,20 +101,24 @@ const GameUI: React.FC<GameUIProps> = (props) => {
               <Clicker onClick={onResourceClick} clickBonus={clickBonus} isBoosted={isRichVeinActive} />
           </div>
 
-          {/* Scrolling part: flex-grow takes remaining space, overflow-y-auto enables scrolling */}
-          <div className="w-full flex-grow overflow-y-auto">
+          {/* Scrolling part for Resource Display */}
+          <div className="w-full flex-grow overflow-y-auto overflow-x-hidden">
               <div className="flex flex-col gap-4 items-center">
                   <ResourceDisplay resources={resources} rps={rps} resourceFlash={resourceFlash} activeBoosts={activeBoosts} />
-                  {abilitiesUnlocked && (
-                      <EventsManager 
-                          activeBoosts={activeBoosts}
-                          cooldowns={cooldowns}
-                          resources={resources}
-                          onActivateAbility={onActivateAbility}
-                      />
-                  )}
               </div>
           </div>
+          
+          {/* Fixed part for Abilities at the bottom */}
+          {abilitiesUnlocked && (
+            <div className="flex-shrink-0">
+                <EventsManager 
+                    activeBoosts={activeBoosts}
+                    cooldowns={cooldowns}
+                    resources={resources}
+                    onActivateAbility={onActivateAbility}
+                />
+            </div>
+          )}
         </div>
 
 
@@ -127,7 +131,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
               <TabButton name="Achievements" active={activeTab === 'achievements'} onClick={() => setActiveTab('achievements')} />
             </div>
           
-          <div className="flex-grow overflow-y-auto p-4">
+          <div className="flex-grow overflow-y-auto overflow-x-hidden p-4">
             {activeTab === 'upgrades' && (
                 <UpgradeShop 
                     resources={resources}
