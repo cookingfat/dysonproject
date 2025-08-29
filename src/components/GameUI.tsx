@@ -9,6 +9,7 @@ import PrestigeManager from './PrestigeManager';
 import AchievementsView from './AchievementsView';
 import EventsManager from './EventsManager';
 import Tooltip from './Tooltip';
+import { RESEARCH_CONFIG } from '../constants';
 
 interface GameUIProps {
   resources: Resources;
@@ -47,16 +48,30 @@ const GameUI: React.FC<GameUIProps> = (props) => {
   } = props;
   
   const [mainViewTab, setMainViewTab] = React.useState<MainViewTab>('upgrades');
-  const [researchTabNotified, setResearchTabNotified] = React.useState(false);
   
   const hasResearchLab = upgrades.some(u => u.id === 'research_lab' && u.owned > 0);
   const prestigeUnlocked = upgrades.some(u => u.id === 'fabricator' && u.owned > 0);
   const abilitiesUnlocked = upgrades.some(u => u.id === 'solar_panel' && u.owned > 0);
 
   const canResearch = hasResearchLab;
-  const showResearchGlow = canResearch && !researchTabNotified;
   const canPrestigeNow = dysonFragments >= 1;
   
+  const isAffordableResearchAvailable = React.useMemo(() => {
+    if (!canResearch) return false;
+    return RESEARCH_CONFIG.some(research => {
+        // Not already completed
+        if (completedResearch.has(research.id)) return false;
+
+        // Prerequisites are met
+        const prereqsMet = research.prerequisites ? research.prerequisites.every(req => completedResearch.has(req)) : true;
+        if (!prereqsMet) return false;
+        
+        // Can afford
+        const affordable = resources[research.cost.resource] >= research.cost.amount;
+        return affordable;
+    });
+  }, [resources, completedResearch, canResearch]);
+
   React.useEffect(() => {
     // If a tab becomes locked (e.g., after prestige), switch to upgrades tab
     if (!canResearch && mainViewTab === 'research') {
@@ -65,19 +80,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
     if (!prestigeUnlocked && mainViewTab === 'prestige') {
       setMainViewTab('upgrades');
     }
-    // Reset notification on prestige
-    if (!canResearch) {
-      setResearchTabNotified(false);
-    }
   }, [canResearch, prestigeUnlocked, mainViewTab]);
-
-  const handleTabClick = (tab: MainViewTab) => {
-    setMainViewTab(tab);
-    if (tab === 'research') {
-        setResearchTabNotified(true);
-    }
-  };
-
 
   return (
     <div className="h-full w-full max-w-screen-2xl mx-auto flex flex-col p-4 gap-4">
@@ -134,7 +137,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
             {/* Tab Header */}
             <div className="flex-shrink-0 flex border-b-2 border-gray-700/50">
                 <button
-                    onClick={() => handleTabClick('upgrades')}
+                    onClick={() => setMainViewTab('upgrades')}
                     className={`flex-1 p-3 text-lg font-bold transition-colors uppercase tracking-wider
                         ${mainViewTab === 'upgrades' ? 'bg-cyan-900/40 text-cyan-200' : 'bg-transparent text-gray-400 hover:bg-gray-800/50'}`}
                     aria-current={mainViewTab === 'upgrades'}
@@ -143,17 +146,17 @@ const GameUI: React.FC<GameUIProps> = (props) => {
                 </button>
                 {canResearch && (
                     <button
-                        onClick={() => handleTabClick('research')}
+                        onClick={() => setMainViewTab('research')}
                         className={`flex-1 p-3 text-lg font-bold transition-colors uppercase tracking-wider
                             ${mainViewTab === 'research' ? 'bg-cyan-900/40 text-cyan-200' : 'bg-transparent text-gray-400 hover:bg-gray-800/50'}
-                            ${showResearchGlow ? 'animate-throb' : ''}`}
+                            ${isAffordableResearchAvailable ? 'animate-throb' : ''}`}
                         aria-current={mainViewTab === 'research'}
                     >
                         Research
                     </button>
                 )}
                 <button
-                    onClick={() => handleTabClick('achievements')}
+                    onClick={() => setMainViewTab('achievements')}
                     className={`flex-1 p-3 text-lg font-bold transition-colors uppercase tracking-wider
                         ${mainViewTab === 'achievements' ? 'bg-cyan-900/40 text-cyan-200' : 'bg-transparent text-gray-400 hover:bg-gray-800/50'}`}
                     aria-current={mainViewTab === 'achievements'}
@@ -162,7 +165,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
                 </button>
                 {prestigeUnlocked && (
                      <button
-                        onClick={() => handleTabClick('prestige')}
+                        onClick={() => setMainViewTab('prestige')}
                         className={`flex-1 p-3 text-lg font-bold transition-colors uppercase tracking-wider
                             ${mainViewTab === 'prestige' ? 'bg-purple-900/40 text-purple-200' : 'bg-transparent text-gray-400 hover:bg-gray-800/50'}
                             ${canPrestigeNow ? 'animate-throb-purple' : ''}`}
