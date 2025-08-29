@@ -9,6 +9,7 @@ import OfflineProgressModal from './components/OfflineProgressModal';
 import ClickableEvent, { ClickableEventInstance } from './components/ClickableEvent';
 import OptionsMenu from './components/OptionsMenu';
 import VictoryScreen from './components/VictoryScreen';
+import HelpModal from './components/HelpModal';
 import { soundManager, SfxType } from './soundManager';
 
 
@@ -46,6 +47,7 @@ const App: React.FC = () => {
   const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
   const [activeClickable, setActiveClickable] = useState<ClickableEventInstance | null>(null);
   const [isOptionsOpen, setIsOptionsOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [volume, setVolume] = useState({ master: 0.8, music: 0.5, sfx: 0.7 });
   const [calculatedPPS, setCalculatedPPS] = useState<Record<string, Partial<Resources>>>({}); // Production Per Second (per unit)
   const [calculatedCPS, setCalculatedCPS] = useState<Record<string, Partial<Resources>>>({}); // Consumption Per Second (per unit)
@@ -743,7 +745,6 @@ const App: React.FC = () => {
   }, []);
   
   const hasWon = resources.dyson_fragments >= DYSON_SPHERE_GOAL;
-  const isRichVeinActive = activeBoosts.some(b => b.sourceId === 'rich_vein');
 
   return (
     <div className="h-full w-full text-white font-sans relative">
@@ -751,9 +752,10 @@ const App: React.FC = () => {
       {offlineGains && <OfflineProgressModal gains={offlineGains} onClose={handleCloseOfflineModal} />}
       {activeClickable && <ClickableEvent event={activeClickable} onClick={handleClickableEvent} />}
       {isOptionsOpen && <OptionsMenu onClose={() => setIsOptionsOpen(false)} volume={volume} onVolumeChange={handleVolumeChange} />}
+      {isHelpOpen && <HelpModal onClose={() => setIsHelpOpen(false)} />}
       {hasWon && !victoryAcknowledged && <VictoryScreen onContinue={() => setVictoryAcknowledged(true)} onPrestige={handlePrestige} />}
       
-      {scene === 'menu' && <MainMenu onStartGame={handleStartGame} onOpenOptions={() => setIsOptionsOpen(true)} />}
+      {scene === 'menu' && <MainMenu onStartGame={handleStartGame} onOpenOptions={() => setIsOptionsOpen(true)} onOpenHelp={() => setIsHelpOpen(true)} />}
       {scene === 'game' && (
         <GameUI 
           resources={resources} 
@@ -775,11 +777,11 @@ const App: React.FC = () => {
           cooldowns={cooldowns}
           onActivateAbility={handleActivateAbility}
           onOpenOptions={() => setIsOptionsOpen(true)}
+          onOpenHelp={() => setIsHelpOpen(true)}
           calculatedPPS={calculatedPPS}
           calculatedCPS={calculatedCPS}
           goal={DYSON_SPHERE_GOAL}
           resourceFlash={resourceFlash}
-          isRichVeinActive={isRichVeinActive}
         />
       )}
     </div>

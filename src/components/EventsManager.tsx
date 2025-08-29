@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Resources, ActiveBoost, AnyAbility } from '../types';
+import { Resources, AnyAbility } from '../types';
 import { ABILITIES_CONFIG } from '../events';
 import Tooltip from './Tooltip';
 
 interface EventsManagerProps {
-    activeBoosts: ActiveBoost[];
     cooldowns: Record<string, number>;
     resources: Resources;
     onActivateAbility: (abilityId: string) => void;
@@ -15,25 +14,6 @@ const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = Math.floor(seconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
-}
-
-const CountdownTimer: React.FC<{ expiresAt: number }> = ({ expiresAt }) => {
-    const [remaining, setRemaining] = useState(expiresAt - Date.now());
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            const newRemaining = expiresAt - Date.now();
-            if (newRemaining <= 0) {
-                setRemaining(0);
-                clearInterval(interval);
-            } else {
-                setRemaining(newRemaining);
-            }
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [expiresAt]);
-
-    return <span className="font-mono">{formatTime(remaining / 1000)}</span>;
 }
 
 const CooldownProgress: React.FC<{ expiresAt: number, cooldown: number }> = ({ expiresAt, cooldown }) => {
@@ -59,7 +39,7 @@ const CooldownProgress: React.FC<{ expiresAt: number, cooldown: number }> = ({ e
 }
 
 
-const EventsManager: React.FC<EventsManagerProps> = ({ activeBoosts, cooldowns, resources, onActivateAbility, hasResearchLab }) => {
+const EventsManager: React.FC<EventsManagerProps> = ({ cooldowns, resources, onActivateAbility, hasResearchLab }) => {
     
     const canAfford = (ability: AnyAbility) => {
         return Object.entries(ability.cost).every(([res, amount]) => resources[res as keyof Resources] >= (amount || 0));
@@ -70,12 +50,12 @@ const EventsManager: React.FC<EventsManagerProps> = ({ activeBoosts, cooldowns, 
     }
 
     return (
-        <div className="relative w-full mt-4">
+        <div className="relative w-full mt-2">
             <div className="absolute inset-0 bg-black/40 rounded-md border border-gray-700/50 clip-corner-sm" aria-hidden="true"></div>
-            <div className="relative p-3">
+            <div className="relative p-2">
                 {/* Player Abilities */}
-                <div className="mb-3">
-                    <h3 className="text-lg text-cyan-300 font-semibold mb-2 text-center uppercase tracking-wider">Abilities</h3>
+                <div>
+                    <h3 className="text-lg text-cyan-300 font-semibold mb-1 text-center uppercase tracking-wider">Abilities</h3>
                     <div className="grid grid-cols-2 gap-2">
                         {ABILITIES_CONFIG.map(ability => {
                             const affordable = canAfford(ability);
@@ -106,23 +86,6 @@ const EventsManager: React.FC<EventsManagerProps> = ({ activeBoosts, cooldowns, 
                         })}
                     </div>
                 </div>
-
-                {/* Active Boosts */}
-                {activeBoosts.length > 0 && (
-                     <div className="border-t border-gray-600/50 pt-3">
-                        <h3 className="text-lg text-purple-300 font-semibold mb-2 text-center uppercase tracking-wider">Active Boosts</h3>
-                        <div className="space-y-2">
-                            {activeBoosts.map(boost => (
-                                <div key={boost.id} className="bg-purple-900/50 p-2 rounded-md text-sm clip-corner-sm">
-                                    <div className="flex justify-between items-center font-bold text-purple-200">
-                                        <span>{boost.name}</span>
-                                        <span><CountdownTimer expiresAt={boost.expiresAt} /></span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                     </div>
-                )}
             </div>
         </div>
     );

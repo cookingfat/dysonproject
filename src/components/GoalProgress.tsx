@@ -10,8 +10,8 @@ const GoalProgress: React.FC<GoalProgressProps> = ({ current, goal }) => {
   const progressPercentage = Math.min((current / goal) * 100, 100);
 
   return (
-    <div className="w-full bg-black/40 backdrop-blur-sm p-6 rounded-md shadow-lg border border-purple-500/50 clip-corner glow-purple-md">
-      <div className="flex justify-between items-baseline mb-2">
+    <div className="w-full bg-black/40 backdrop-blur-sm p-4 rounded-md shadow-lg border border-purple-500/50 clip-corner glow-purple-md">
+      <div className="flex justify-between items-baseline mb-1">
         <h2 className="text-xl font-bold text-purple-300 uppercase tracking-wider">Dyson Sphere Progress</h2>
         <p className="font-mono text-xl text-purple-200">
             {current.toLocaleString(undefined, { maximumFractionDigits: 0 })} / {goal.toLocaleString()}

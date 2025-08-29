@@ -34,8 +34,8 @@ const PrestigeManager: React.FC<PrestigeManagerProps> = ({ prestigePoints, prest
   };
 
   return (
-    <div className="w-full bg-black/40 backdrop-blur-sm p-6 rounded-md shadow-lg border border-purple-700/60 text-center clip-corner">
-      <h3 className="text-2xl font-bold text-purple-300 mb-2 uppercase tracking-wider">Prestige</h3>
+    <div className="w-full bg-black/40 backdrop-blur-sm p-4 rounded-md shadow-lg border border-purple-700/60 text-center clip-corner">
+      <h3 className="text-2xl font-bold text-purple-300 mb-1 uppercase tracking-wider">Prestige</h3>
        <p className="text-gray-300 mb-2">
         Current production bonus: <strong className="text-white font-mono">{currentBonus}%</strong>
       </p>
@@ -60,7 +60,7 @@ const PrestigeManager: React.FC<PrestigeManagerProps> = ({ prestigePoints, prest
            <p className="text-lg font-semibold text-white mb-2">
             Ready to gain: <span className="font-bold text-purple-400 font-mono">{fragmentsToGain}</span> Prestige Points
           </p>
-          <p className="text-gray-400 mb-4 text-sm">
+          <p className="text-gray-400 mb-3 text-sm">
             New total bonus after prestige: <strong className="text-white font-mono">{bonusAfterPrestige}%</strong>
           </p>
           <button
