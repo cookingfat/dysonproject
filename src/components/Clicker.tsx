@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ActiveBoost } from '../types';
 import Tooltip from './Tooltip';
+import { formatNumber } from '../utils';
 
 interface ClickerProps {
   onClick: () => void;
@@ -116,7 +117,7 @@ const Clicker: React.FC<ClickerProps> = ({ onClick, clickBonus, activeBoosts }) 
                    hover:bg-cyan-500 hover:shadow-xl hover:shadow-cyan-400/50 hover:scale-105
                    active:scale-95 active:bg-cyan-700
                    ${isRichVeinActive ? 'animate-pulse-gold' : ''}`}
-        aria-label={`Mine ${clickBonus} ore`}
+        aria-label={`Mine ${formatNumber(clickBonus)} ore`}
       >
         Mine Ore
       </button>
@@ -140,7 +141,7 @@ const Clicker: React.FC<ClickerProps> = ({ onClick, clickBonus, activeBoosts }) 
               }}
               aria-hidden="true"
             >
-              +{effect.bonus.toFixed(0)}
+              +{formatNumber(effect.bonus)}
             </span>
           ))}
         </>,

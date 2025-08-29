@@ -1,4 +1,4 @@
-import { Upgrade, Resources, Research } from './types';
+import { Upgrade, Resources, Research, PrestigeUpgrade } from './types';
 
 export const INITIAL_RESOURCES: Resources = {
   energy: 0,
@@ -6,18 +6,21 @@ export const INITIAL_RESOURCES: Resources = {
   parts: 0,
   dyson_fragments: 0,
   research_points: 0,
+  condensed_fragments: 0,
+  stellar_essence: 0,
 };
 
-export const DYSON_SPHERE_GOAL = 1_000_000;
+export const STELLAR_ESSENCE_GOAL = 1_000_000;
 
 // The initial configuration for all available upgrades in the game.
 export const UPGRADES_CONFIG: Upgrade[] = [
+  // ... [Existing Tier 1-3 buildings] ...
   {
     id: 'auto_miner',
     name: 'Auto-Miner',
     description: 'Automatically mines raw ore from the ground.',
-    baseCost: { ore: 10, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 10, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 10, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 10, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.08,
     production: { ore: 0.5 },
     consumption: {},
@@ -30,8 +33,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Solar Panel',
     description: 'Generates a steady stream of energy from the sun.',
     unlocksAt: { owned: { auto_miner: 5 } },
-    baseCost: { ore: 100, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 100, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 100, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 100, energy: 0, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.10,
     production: { energy: 5 },
     consumption: {},
@@ -44,8 +47,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Industrial Drill',
     description: 'A heavy-duty drill that rapidly extracts ore, but requires energy.',
     unlocksAt: { owned: { solar_panel: 10 }, resources: { ore: 1000 } },
-    baseCost: { ore: 250, energy: 50, parts: 0, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 250, energy: 50, parts: 0, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 250, energy: 50, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 250, energy: 50, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.12,
     production: { ore: 5 },
     consumption: { energy: 1 },
@@ -70,8 +73,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Geothermal Plant',
     description: 'Taps into the planet\'s core for a reliable, but maintenance-heavy, power source.',
     unlocksAt: { owned: { industrial_drill: 1 } },
-    baseCost: { ore: 500, energy: 0, parts: 25, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 500, energy: 0, parts: 25, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 500, energy: 0, parts: 25, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 500, energy: 0, parts: 25, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.18,
     production: { energy: 20 },
     consumption: { parts: 0.1 },
@@ -84,8 +87,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Smelter',
     description: 'Refines ore into usable machinery parts.',
     unlocksAt: { owned: { industrial_drill: 5 } },
-    baseCost: { ore: 500, energy: 100, parts: 0, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 500, energy: 100, parts: 0, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 500, energy: 100, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 500, energy: 100, parts: 0, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.25,
     production: { parts: 2 },
     consumption: { ore: 5, energy: 5 },
@@ -110,8 +113,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Quarry Excavator',
     description: 'A massive machine that carves out entire sections of rock.',
     unlocksAt: { owned: { smelter: 10 }, resources: { parts: 50 } },
-    baseCost: { ore: 1000, energy: 200, parts: 50, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 1000, energy: 200, parts: 50, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 1000, energy: 200, parts: 50, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 1000, energy: 200, parts: 50, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.25,
     production: { ore: 25 },
     consumption: { energy: 10 },
@@ -124,8 +127,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Advanced Smelter',
     description: 'Uses plasma injection to refine ore into parts with higher efficiency.',
     unlocksAt: { owned: { quarry_excavator: 5 }, resources: { parts: 500 } },
-    baseCost: { ore: 2000, energy: 500, parts: 250, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 2000, energy: 500, parts: 250, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 2000, energy: 500, parts: 250, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 2000, energy: 500, parts: 250, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.22,
     production: { parts: 5 },
     consumption: { ore: 8, energy: 10 },
@@ -134,12 +137,12 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     tags: ['factory'],
   },
   {
-    id: 'part_combustor',
+    id: 'ore_plasma_torch',
     name: 'Ore Plasma Torch',
     description: 'Consumes raw ore to generate a large amount of energy.',
     unlocksAt: { resources: { parts: 250 } },
-    baseCost: { ore: 5000, energy: 1000, parts: 50, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 5000, energy: 1000, parts: 50, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 5000, energy: 1000, parts: 50, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 5000, energy: 1000, parts: 50, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.25,
     production: { energy: 50 },
     consumption: { ore: 15 },
@@ -152,8 +155,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Research Lab',
     description: 'Generates Research Points to unlock powerful technologies.',
     unlocksAt: { owned: { smelter: 5 }, resources: { parts: 100 } },
-    baseCost: { ore: 0, energy: 500, parts: 200, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 0, energy: 500, parts: 200, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 0, energy: 500, parts: 200, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 0, energy: 500, parts: 200, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.3,
     production: { research_points: 0.5 },
     consumption: { energy: 20, parts: 1 },
@@ -166,8 +169,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Part Fabricator',
     description: 'Assembles parts into fragments of a Dyson Sphere.',
     unlocksAt: { resources: { parts: 1000, energy: 2500 } },
-    baseCost: { ore: 0, energy: 5000, parts: 1000, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 0, energy: 5000, parts: 1000, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 0, energy: 5000, parts: 1000, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 0, energy: 5000, parts: 1000, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.3,
     production: { dyson_fragments: 0.1 },
     consumption: { energy: 100, parts: 10 },
@@ -175,12 +178,12 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     level: 1,
     synergies: [
       {
-        sourceId: 'self_replicating_assembler',
+        sourceId: 'fusion_reactor',
         targetStat: 'production',
         targetResource: 'dyson_fragments',
         bonus: {
           type: 'flat',
-          value: 0.01, // +0.01 fragments/sec per Assembler
+          value: 0.05, // +0.05 fragments/sec per Fusion Reactor
           per: 1,
         }
       }
@@ -191,8 +194,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Drone Bay',
     description: 'Deploys automated mining drones that gain a production bonus from other miners.',
     unlocksAt: { owned: { quarry_excavator: 10 } },
-    baseCost: { ore: 10000, energy: 2000, parts: 1000, dyson_fragments: 0, research_points: 0 },
-    cost: { ore: 10000, energy: 2000, parts: 1000, dyson_fragments: 0, research_points: 0 },
+    baseCost: { ore: 10000, energy: 2000, parts: 1000, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { ore: 10000, energy: 2000, parts: 1000, dyson_fragments: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.18,
     production: { ore: 50 },
     consumption: { energy: 25 },
@@ -219,8 +222,8 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Fusion Reactor',
     description: 'A miniature star that consumes Dyson Fragments to generate immense power.',
     unlocksAt: { owned: { fabricator: 5 }, resources: { dyson_fragments: 10 } },
-    baseCost: { energy: 10000, parts: 5000, dyson_fragments: 5, ore: 0, research_points: 0 },
-    cost: { energy: 10000, parts: 5000, dyson_fragments: 5, ore: 0, research_points: 0 },
+    baseCost: { energy: 10000, parts: 5000, dyson_fragments: 5, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { energy: 10000, parts: 5000, dyson_fragments: 5, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     costMultiplier: 1.35,
     production: { energy: 1000 },
     consumption: { dyson_fragments: 0.01 },
@@ -229,19 +232,46 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     tags: ['power', 'exotic'],
   },
   {
-    id: 'self_replicating_assembler',
-    name: 'Self-Replicating Assembler',
-    description: 'An autonomous factory that consumes parts to slowly build more of itself. Each assembler boosts the output of all Part Fabricators.',
+    id: 'quantum_forge',
+    name: 'Quantum Forge',
+    description: 'A highly advanced forge that converts raw energy and Dyson Fragments directly into complex machinery parts.',
     unlocksAt: { owned: { fusion_reactor: 1 } },
-    baseCost: { parts: 10000, dyson_fragments: 20, energy: 0, ore: 0, research_points: 0 },
-    cost: { parts: 10000, dyson_fragments: 20, energy: 0, ore: 0, research_points: 0 },
-    costMultiplier: 1.5,
-    production: {}, // No direct production
-    consumption: { parts: 25 }, // Consumes parts to replicate
+    baseCost: { parts: 25000, dyson_fragments: 50, energy: 15000, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { parts: 25000, dyson_fragments: 50, energy: 15000, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    costMultiplier: 1.4,
+    production: { parts: 50 },
+    consumption: { energy: 500, dyson_fragments: 0.1 },
     owned: 0,
     level: 1,
     tags: ['factory', 'exotic'],
-    specialEffect: 'self_replicating',
+  },
+  {
+    id: 'fragment_condenser',
+    name: 'Fragment Condenser',
+    description: 'Compresses Dyson Fragments into a denser, more exotic form of matter.',
+    unlocksAt: { owned: { quantum_forge: 10 }, resources: { dyson_fragments: 1000 } },
+    baseCost: { parts: 100000, dyson_fragments: 500, energy: 50000, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    cost: { parts: 100000, dyson_fragments: 500, energy: 50000, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
+    costMultiplier: 1.25,
+    production: { condensed_fragments: 0.5 },
+    consumption: { energy: 2500, dyson_fragments: 1 },
+    owned: 0,
+    level: 1,
+    tags: ['factory', 'exotic'],
+  },
+  {
+    id: 'stellar_forge',
+    name: 'Stellar Forge',
+    description: 'The ultimate achievement in engineering. Forges Condensed Fragments into pure Stellar Essence.',
+    unlocksAt: { owned: { fragment_condenser: 5 }, resources: { condensed_fragments: 100 } },
+    baseCost: { parts: 1000000, dyson_fragments: 0, energy: 250000, ore: 0, research_points: 0, condensed_fragments: 100, stellar_essence: 0 },
+    cost: { parts: 1000000, dyson_fragments: 0, energy: 250000, ore: 0, research_points: 0, condensed_fragments: 100, stellar_essence: 0 },
+    costMultiplier: 1.3,
+    production: { stellar_essence: 0.1 },
+    consumption: { energy: 10000, condensed_fragments: 1 },
+    owned: 0,
+    level: 1,
+    tags: ['factory', 'exotic'],
   },
 ];
 
@@ -485,5 +515,78 @@ export const RESEARCH_CONFIG: Research[] = [
         value: 1.25,
         tags: ['exotic'],
         prerequisites: ['prestige_potency_3'],
+    },
+];
+
+export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
+    {
+        id: 'global_production_boost',
+        name: 'Global Production Boost',
+        description: (level, value) => `Increases all resource production by ${((value - 1) * 100).toFixed(0)}%.`,
+        maxLevel: 20,
+        cost: level => 1 + Math.floor(Math.pow(level, 1.5)),
+        type: 'production_multiplier',
+        target: 'all',
+        value: level => 1 + level * 0.05, // +5% per level
+    },
+    {
+        id: 'click_power_boost',
+        name: 'Click Power',
+        description: (level, value) => `Increases manual click power by ${((value - 1) * 100).toFixed(0)}%.`,
+        maxLevel: 10,
+        cost: level => 2 * (level + 1),
+        type: 'click_multiplier',
+        target: 'click',
+        value: level => 1 + level * 0.25, // +25% per level
+    },
+    {
+        id: 'building_cost_reduction',
+        name: 'Engineering Efficiency',
+        description: (level, value) => `Reduces the cost of all buildings by ${(100 - value * 100).toFixed(1)}%.`,
+        maxLevel: 10,
+        cost: level => 5 + Math.floor(Math.pow(level, 2)),
+        type: 'cost_reduction',
+        target: 'all_buildings',
+        value: level => 1 - level * 0.025, // -2.5% per level
+    },
+    {
+        id: 'starting_ore',
+        name: 'Geological Survey',
+        description: (level, value) => `Start each prestige with ${value.toLocaleString()} extra ore.`,
+        maxLevel: 5,
+        cost: level => 1 * (level + 1),
+        type: 'production_multiplier', // Note: This is a special case handled in prestige logic
+        target: 'starting_ore',
+        value: level => level * 100, // +100 ore per level
+    },
+    {
+        id: 'miner_production_boost',
+        name: 'Mining Guild Charter',
+        description: (level, value) => `Increases production of all 'miner' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
+        maxLevel: 15,
+        cost: level => 2 + level,
+        type: 'production_multiplier',
+        target: 'miner',
+        value: level => 1 + level * 0.1, // +10% per level
+    },
+    {
+        id: 'power_production_boost',
+        name: 'Energy Grid Optimization',
+        description: (level, value) => `Increases production of all 'power' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
+        maxLevel: 15,
+        cost: level => 2 + level,
+        type: 'production_multiplier',
+        target: 'power',
+        value: level => 1 + level * 0.1, // +10% per level
+    },
+    {
+        id: 'factory_production_boost',
+        name: 'Factory Overclock',
+        description: (level, value) => `Increases production of all 'factory' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
+        maxLevel: 15,
+        cost: level => 2 + level,
+        type: 'production_multiplier',
+        target: 'factory',
+        value: level => 1 + level * 0.1, // +10% per level
     },
 ];

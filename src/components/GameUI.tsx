@@ -19,12 +19,13 @@ interface GameUIProps {
   unlockedAchievements: Set<string>;
   onResourceClick: () => void;
   onBuyUpgrade: (upgradeId: string) => void;
-  onLevelUpUpgrade: (upgradeId: string) => void;
+  onLevelUpUpgrade: (upgradeId:string) => void;
   onBuyResearch: (researchId: string) => void;
+  onBuyPrestigeUpgrade: (upgradeId: string) => void;
   dysonFragments: number;
   clickBonus: number;
   prestigePoints: number;
-  prestigeBonusPerPoint: number;
+  prestigeUpgrades: Record<string, number>;
   onPrestige: () => void;
   rps: Partial<Resources>;
   activeBoosts: ActiveBoost[];
@@ -43,7 +44,7 @@ type MainViewTab = 'upgrades' | 'research' | 'achievements' | 'prestige';
 const GameUI: React.FC<GameUIProps> = (props) => {
   const { 
       resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, onResourceClick, 
-      onBuyUpgrade, onLevelUpUpgrade, onBuyResearch, dysonFragments, clickBonus, prestigePoints, prestigeBonusPerPoint, 
+      onBuyUpgrade, onLevelUpUpgrade, onBuyResearch, onBuyPrestigeUpgrade, dysonFragments, clickBonus, prestigePoints, prestigeUpgrades, 
       onPrestige, rps, activeBoosts, cooldowns, onActivateAbility, onOpenOptions, onOpenHelp, calculatedPPS, calculatedCPS, goal, resourceFlash
   } = props;
   
@@ -112,7 +113,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
         <div className="lg:col-span-1 bg-black/30 backdrop-blur-sm p-4 rounded-md shadow-lg border border-gray-700/50 flex flex-col gap-2 clip-corner">
           <div className="flex-shrink-0">
             <GoalProgress 
-                current={dysonFragments}
+                current={resources.stellar_essence}
                 goal={goal}
             />
           </div>
@@ -204,9 +205,10 @@ const GameUI: React.FC<GameUIProps> = (props) => {
                 {mainViewTab === 'prestige' && prestigeUnlocked && (
                     <PrestigeManager 
                         prestigePoints={prestigePoints}
-                        prestigeBonusPerPoint={prestigeBonusPerPoint}
+                        prestigeUpgrades={prestigeUpgrades}
                         fragmentsReady={dysonFragments}
                         onPrestige={onPrestige}
+                        onBuyPrestigeUpgrade={onBuyPrestigeUpgrade}
                         isUnlocked={prestigeUnlocked}
                     />
                 )}

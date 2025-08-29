@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upgrade, Resources, ResourceType } from '../types';
+import { formatNumber, formatResourceCost } from '../utils';
 
 interface UpgradeItemProps {
   upgrade: Upgrade;
@@ -12,27 +13,8 @@ interface UpgradeItemProps {
   isLocked?: boolean;
 }
 
-const formatNumber = (num: number) => {
-  if (num < 1000) return num.toLocaleString(undefined, {maximumFractionDigits: 0});
-  if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
-  if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
-  return (num / 1000000000).toFixed(1) + 'B';
-};
-
-const RESOURCE_ICONS: Record<string, string> = {
-    ore: '⛏️',
-    energy: '⚡',
-    parts: '⚙️',
-    dyson_fragments: '🌌',
-    research_points: '🔬',
-};
-
-const ResourceCost: React.FC<{ cost: Partial<Resources> }> = ({ cost }) => {
-  const costs = Object.entries(cost)
-    .filter(([, amount]) => (amount ?? 0) > 0)
-    .map(([res, amount]) => `${formatNumber(amount!)} ${RESOURCE_ICONS[res as ResourceType] || res}`)
-    .join(' ');
-  return <>{costs}</>;
+const ResourceCostDisplay: React.FC<{ cost: Partial<Resources> }> = ({ cost }) => {
+  return <>{formatResourceCost(cost)}</>;
 };
 
 const RomanNumerals: { [key: number]: string } = {
@@ -49,7 +31,7 @@ const Requirements: React.FC<{ upgrade: Upgrade; allUpgrades: Upgrade[] }> = ({ 
 
     const resourceReqs = Object.entries(upgrade.unlocksAt.resources || {}).map(([res, amount]) => {
         const metaName = res.charAt(0).toUpperCase() + res.slice(1).replace(/_/g, ' ');
-        return <li key={res}>{`Have ${amount?.toLocaleString()} ${metaName}`}</li>;
+        return <li key={res}>{`Have ${formatNumber(amount || 0)} ${metaName}`}</li>;
     });
 
     if (ownedReqs.length === 0 && resourceReqs.length === 0) return null;
@@ -89,12 +71,12 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, on
 
   const unitProduction = calculatedPPS[upgrade.id] || upgrade.production;
   const productionText = Object.entries(unitProduction)
-    .map(([res, amount]) => `▲ +${(amount ?? 0).toFixed(2)} ${res}/s`)
+    .map(([res, amount]) => `▲ +${formatNumber(amount ?? 0)} ${res}/s`)
     .join(', ');
 
   const unitConsumption = calculatedCPS[upgrade.id] || upgrade.consumption;
   const consumptionText = Object.entries(unitConsumption)
-    .map(([res, amount]) => `▼ -${(amount ?? 0).toFixed(2)} ${res}/s`)
+    .map(([res, amount]) => `▼ -${formatNumber(amount ?? 0)} ${res}/s`)
     .join(', ');
 
   const canAffordAnything = canAffordBuy || canAffordLevelUp;
@@ -176,7 +158,7 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, on
                             bg-purple-500 hover:bg-purple-400"
                     >
                     <span>Level Up</span>
-                    <span className="font-normal text-xs">(<ResourceCost cost={levelUpCost} />)</span>
+                    <span className="font-normal text-xs">(<ResourceCostDisplay cost={levelUpCost} />)</span>
                 </button>
             )}
             <button
@@ -187,7 +169,7 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, on
                         bg-cyan-500 hover:bg-cyan-400"
                 >
                 <span>Buy Unit</span>
-                <span className="font-normal text-xs">(<ResourceCost cost={upgrade.cost} />)</span>
+                <span className="font-normal text-xs">(<ResourceCostDisplay cost={upgrade.cost} />)</span>
             </button>
           </>
         )}

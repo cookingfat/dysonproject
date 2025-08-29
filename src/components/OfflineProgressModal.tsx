@@ -1,5 +1,6 @@
 import React from 'react';
 import { Resources, ResourceType } from '../types';
+import { formatNumber } from '../utils';
 
 interface OfflineProgressModalProps {
   gains: Partial<Resources>;
@@ -10,16 +11,10 @@ const RESOURCE_METADATA: Record<ResourceType, { name: string, color: string, ico
     ore: { name: 'Ore', color: 'text-orange-400', icon: '⛏️' },
     energy: { name: 'Energy', color: 'text-yellow-300', icon: '⚡' },
     parts: { name: 'Parts', color: 'text-sky-400', icon: '⚙️' },
-    dyson_fragments: { name: 'Dyson Fragments', color: 'text-purple-400', icon: '🌌' },
     research_points: { name: 'Research', color: 'text-cyan-300', icon: '🔬' },
-};
-
-const formatNumber = (num: number) => {
-    if (num < 1000) return num.toFixed(1);
-    if (num < 1e6) return (num / 1e3).toFixed(2) + 'K';
-    if (num < 1e9) return (num / 1e6).toFixed(2) + 'M';
-    if (num < 1e12) return (num / 1e9).toFixed(2) + 'B';
-    return (num / 1e12).toFixed(2) + 'T';
+    dyson_fragments: { name: 'Dyson Fragments', color: 'text-purple-400', icon: '🌌' },
+    condensed_fragments: { name: 'Cond. Fragments', color: 'text-indigo-400', icon: '💠' },
+    stellar_essence: { name: 'Stellar Essence', color: 'text-rose-400', icon: '🌟' },
 };
 
 const OfflineProgressModal: React.FC<OfflineProgressModalProps> = ({ gains, onClose }) => {
@@ -29,9 +24,10 @@ const OfflineProgressModal: React.FC<OfflineProgressModalProps> = ({ gains, onCl
         <h2 className="text-3xl font-bold text-cyan-300 mb-4 uppercase tracking-wider">Welcome Back!</h2>
         <p className="text-gray-300 mb-6">While you were away, your factory produced:</p>
         <div className="space-y-3 text-left bg-black/50 p-4 rounded-md mb-6 clip-corner-sm">
-          {(Object.keys(gains) as ResourceType[]).map(key => {
-            const meta = RESOURCE_METADATA[key as ResourceType];
-            const amount = gains[key as ResourceType]!;
+          {(Object.keys(gains) as (keyof Resources)[]).map(key => {
+            const meta = RESOURCE_METADATA[key];
+            if (!meta) return null;
+            const amount = gains[key]!;
             if (amount < 0.1) return null;
             return (
               <div key={key} className="flex justify-between items-center">

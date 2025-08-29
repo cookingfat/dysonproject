@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Scene, Upgrade, Resources, ResourceType, Stats, ActiveBoost } from './types';
-import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG, DYSON_SPHERE_GOAL } from './constants';
+import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG, STELLAR_ESSENCE_GOAL, PRESTIGE_UPGRADES_CONFIG } from './constants';
 import { ACHIEVEMENTS_CONFIG } from './achievements';
 import { ABILITIES_CONFIG, RANDOM_EVENTS_CONFIG, CLICKABLE_EVENTS_CONFIG } from './events';
 import MainMenu from './components/MainMenu';
@@ -13,7 +13,7 @@ import HelpModal from './components/HelpModal';
 import { soundManager, SfxType } from './soundManager';
 
 
-const SAVE_KEY = 'projectDysonSaveData_v1';
+const SAVE_KEY = 'projectDysonSaveData_v2'; // Incremented version for new save structure
 
 interface Notification {
   id: number;
@@ -38,9 +38,10 @@ const App: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [completedResearch, setCompletedResearch] = useState<Set<string>>(new Set());
   const [unlockedAchievements, setUnlockedAchievements] = useState<Set<string>>(new Set());
-  const [bonuses, setBonuses] = useState({ click: 1, production: new Map<string, number>(), consumption: new Map<string, number>(), synergy: 1, autoClick: 0, prestige: 1 });
+  const [bonuses, setBonuses] = useState({ click: 1, production: new Map<string, number>(), consumption: new Map<string, number>(), synergy: 1, autoClick: 0, costReduction: 1 });
   const [prestigePoints, setPrestigePoints] = useState(0);
-  const [stats, setStats] = useState<Stats>({ total_clicks: 0, total_prestiges: 0, sra_progress: 0 });
+  const [prestigeUpgrades, setPrestigeUpgrades] = useState<Record<string, number>>({});
+  const [stats, setStats] = useState<Stats>({ total_clicks: 0, total_prestiges: 0 });
   const [rps, setRps] = useState<Partial<Resources>>({});
   const [offlineGains, setOfflineGains] = useState<Partial<Resources> | null>(null);
   const [activeBoosts, setActiveBoosts] = useState<ActiveBoost[]>([]);
@@ -108,6 +109,7 @@ const App: React.FC = () => {
         if (savedData.completedResearch) setCompletedResearch(new Set(savedData.completedResearch));
         if (savedData.unlockedAchievements) setUnlockedAchievements(new Set(savedData.unlockedAchievements));
         if (savedData.prestigePoints) setPrestigePoints(savedData.prestigePoints);
+        if (savedData.prestigeUpgrades) setPrestigeUpgrades(savedData.prestigeUpgrades || {});
         if (savedData.stats) setStats(savedData.stats);
         if (savedData.cooldowns) setCooldowns(savedData.cooldowns);
         if (savedData.victoryAcknowledged) setVictoryAcknowledged(savedData.victoryAcknowledged);
@@ -121,16 +123,7 @@ const App: React.FC = () => {
           const loadedUpgrades = UPGRADES_CONFIG.map(configUpgrade => {
             const savedUpgrade = savedData.upgrades.find((u: { id: string }) => u.id === configUpgrade.id);
             if (savedUpgrade) {
-              let currentCost = { ...configUpgrade.baseCost };
-              if (savedUpgrade.owned > 0) {
-                  for (const key in currentCost) {
-                    const resource = key as ResourceType;
-                    if (configUpgrade.baseCost[resource] > 0) {
-                       currentCost[resource] = Math.ceil(configUpgrade.baseCost[resource] * Math.pow(configUpgrade.costMultiplier, savedUpgrade.owned));
-                    }
-                  }
-              }
-              return { ...configUpgrade, owned: savedUpgrade.owned, cost: currentCost, level: savedUpgrade.level || 1 };
+              return { ...configUpgrade, owned: savedUpgrade.owned, cost: configUpgrade.cost, level: savedUpgrade.level || 1 };
             }
             return configUpgrade;
           });
@@ -147,6 +140,7 @@ const App: React.FC = () => {
   // Save game to localStorage periodically
   useEffect(() => {
     const saveInterval = setInterval(() => {
+      if (scene !== 'game') return;
       const dataToSave = {
         resources,
         upgrades: upgrades.map(u => ({ id: u.id, owned: u.owned, level: u.level })),
@@ -154,6 +148,7 @@ const App: React.FC = () => {
         completedResearch: Array.from(completedResearch),
         unlockedAchievements: Array.from(unlockedAchievements),
         prestigePoints,
+        prestigeUpgrades,
         stats,
         rps,
         cooldowns,
@@ -165,7 +160,7 @@ const App: React.FC = () => {
     }, 5000);
 
     return () => clearInterval(saveInterval);
-  }, [resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, prestigePoints, stats, rps, cooldowns, volume, victoryAcknowledged]);
+  }, [resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, prestigePoints, prestigeUpgrades, stats, rps, cooldowns, volume, victoryAcknowledged, scene]);
   
   // Effect to handle starting music
   useEffect(() => {
@@ -181,7 +176,7 @@ const App: React.FC = () => {
     soundManager.setSfxVolume(volume.sfx);
   }, [volume]);
 
-  // Effect to calculate research & active bonuses
+  // Effect to calculate research & prestige bonuses
   useEffect(() => {
     const newBonuses = {
         click: 1,
@@ -189,23 +184,39 @@ const App: React.FC = () => {
         consumption: new Map<string, number>(),
         synergy: 1,
         autoClick: 0,
-        prestige: 1,
+        costReduction: 1,
     };
+    
+    // Prestige Upgrades
+    for (const [id, level] of Object.entries(prestigeUpgrades)) {
+        if (level > 0) {
+            const config = PRESTIGE_UPGRADES_CONFIG.find(p => p.id === id);
+            if (!config) continue;
+            const value = config.value(level);
+            switch (config.type) {
+                case 'production_multiplier': {
+                    const current = newBonuses.production.get(config.target) || 1;
+                    newBonuses.production.set(config.target, current * value);
+                    break;
+                }
+                case 'click_multiplier':
+                    newBonuses.click *= value;
+                    break;
+                case 'cost_reduction':
+                    newBonuses.costReduction *= value;
+                    break;
+            }
+        }
+    }
 
-    let prestigeBonusPerPoint = 0.1;
-
+    // Research
     completedResearch.forEach(researchId => {
         const research = RESEARCH_CONFIG.find(r => r.id === researchId);
         if (!research) return;
-
         if (research.type === 'click_multiplier') newBonuses.click *= research.value;
         else if (research.type === 'production_multiplier') {
-            if(research.target === 'prestige') {
-                prestigeBonusPerPoint += research.value;
-            } else {
-                const currentMultiplier = newBonuses.production.get(research.target) || 1;
-                newBonuses.production.set(research.target, currentMultiplier * research.value);
-            }
+             const currentMultiplier = newBonuses.production.get(research.target) || 1;
+             newBonuses.production.set(research.target, currentMultiplier * research.value);
         }
         else if (research.type === 'consumption_multiplier') {
             const currentMultiplier = newBonuses.consumption.get(research.target) || 1;
@@ -215,23 +226,42 @@ const App: React.FC = () => {
         else if (research.type === 'auto_click') newBonuses.autoClick += research.value;
     });
     
+    // Active Boosts (from abilities/events)
     activeBoosts.forEach(boost => {
-        if (boost.type === 'click_multiplier') {
-            newBonuses.click *= boost.value;
-        }
+        if (boost.type === 'click_multiplier') newBonuses.click *= boost.value;
     });
 
-    newBonuses.prestige = prestigeBonusPerPoint;
     setBonuses(newBonuses);
-  }, [completedResearch, activeBoosts]);
+  }, [completedResearch, activeBoosts, prestigeUpgrades]);
+  
+  // Effect to recalculate all upgrade costs when cost reduction changes or an upgrade is bought.
+  // FIX: Moved ownedCounts outside of the useEffect callback to fix a scope issue. Used useMemo for optimization.
+  const ownedCounts = useMemo(() => JSON.stringify(upgrades.map(u => u.owned)), [upgrades]); // Stable dependency
+  useEffect(() => {
+    setUpgrades(prevUpgrades =>
+      prevUpgrades.map(up => {
+        const newCost = { ...up.baseCost };
+        for (const key in newCost) {
+          const resource = key as ResourceType;
+          if (up.baseCost[resource] > 0) {
+            const reducedBaseCost = up.baseCost[resource] * bonuses.costReduction;
+            newCost[resource] = Math.ceil(reducedBaseCost * Math.pow(up.costMultiplier, up.owned));
+          }
+        }
+        return { ...up, cost: newCost };
+      })
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bonuses.costReduction, ownedCounts]);
+
 
   // Effect to pre-calculate production/consumption for UI display and game tick
   useEffect(() => {
     const newPPS: Record<string, Partial<Resources>> = {};
     const newCPS: Record<string, Partial<Resources>> = {};
-
-    const prestigeBonus = bonuses.prestige / 100;
-    const globalProductionMultiplier = 1 + (prestigePoints * prestigeBonus);
+    
+    // Base Prestige Bonus (1% per point)
+    const prestigeBonus = 1 + (prestigePoints * 0.01);
 
     upgrades.forEach(u => {
         // --- Production Calculation (per unit) ---
@@ -253,7 +283,7 @@ const App: React.FC = () => {
 
         const unitProduction: Partial<Resources> = {};
         Object.entries(u.production).forEach(([res, amount]) => {
-            unitProduction[res as ResourceType] = amount * researchMultiplier * globalProductionMultiplier * boostMultiplier * levelBonus;
+            unitProduction[res as ResourceType] = amount * researchMultiplier * prestigeBonus * boostMultiplier * levelBonus;
         });
         newPPS[u.id] = unitProduction;
 
@@ -338,15 +368,13 @@ const App: React.FC = () => {
 
         // Pass 3: Consumption & Final Net Change
         const totalProductionThisTick: Partial<Stats> = {};
-        const activeUpgradesThisTick = new Set<string>();
-
+        
         upgrades.forEach(u => {
             if (u.owned > 0) {
                 const unitConsumption = calculatedCPS[u.id] || {};
                 const canAfford = Object.entries(unitConsumption).every(([res, amount]) => resources[res as ResourceType] >= (amount! * u.owned) / 10);
 
                 if (canAfford) {
-                    activeUpgradesThisTick.add(u.id);
                     const upgradeProduction = productionFromUpgrade.get(u.id) || {};
                     Object.entries(upgradeProduction).forEach(([res, amount]) => {
                         netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) + amount / 10;
@@ -359,16 +387,6 @@ const App: React.FC = () => {
                 }
             }
         });
-
-        // Pass 4: Special Effects
-        const selfReplicator = upgrades.find(u => u.id === 'self_replicating_assembler');
-        let newSraProgress: number | undefined;
-
-        if (selfReplicator && selfReplicator.owned > 0 && activeUpgradesThisTick.has('self_replicating_assembler')) {
-            const partsConsumed = (selfReplicator.consumption.parts || 0) * selfReplicator.owned;
-            const progressPerTick = (partsConsumed / selfReplicator.baseCost.parts!) / 10;
-            newSraProgress = (stats.sra_progress || 0) + progressPerTick;
-        }
         
         setResources(prev => {
             const newResources = { ...prev };
@@ -385,10 +403,6 @@ const App: React.FC = () => {
             for(const key in totalProductionThisTick) {
                 newStats[key] = (prev[key] || 0) + totalProductionThisTick[key]!;
             }
-            // Update sra_progress state if it changed
-            if (newSraProgress !== undefined) {
-                newStats.sra_progress = newSraProgress;
-            }
             return newStats;
         });
 
@@ -396,7 +410,7 @@ const App: React.FC = () => {
         for (const key in netChangePerTick) newRps[key as ResourceType] = (netChangePerTick[key as ResourceType] ?? 0) * 10;
         setRps(newRps);
     }
-  }, [resources, upgrades, bonuses, prestigePoints, activeBoosts, stats.sra_progress, calculatedPPS, calculatedCPS]);
+  }, [resources, upgrades, bonuses, activeBoosts, calculatedPPS, calculatedCPS]);
 
   // Main game loop timer.
   useEffect(() => {
@@ -404,32 +418,6 @@ const App: React.FC = () => {
     return () => clearInterval(gameTick);
   }, []);
   
-  // Effect for Self-Replicating Assembler creating new units
-  useEffect(() => {
-    const progress = stats.sra_progress || 0;
-    if (progress >= 1) {
-        const newUnits = Math.floor(progress);
-        const sra = upgrades.find(u => u.id === 'self_replicating_assembler');
-        if (sra) {
-            const newOwned = sra.owned + newUnits;
-            const newCost = { ...sra.baseCost };
-            for (const key in newCost) {
-                const resource = key as ResourceType;
-                if (sra.baseCost[resource] > 0) {
-                    newCost[resource] = Math.ceil(sra.baseCost[resource] * Math.pow(sra.costMultiplier, newOwned));
-                }
-            }
-            setUpgrades(prev => prev.map(u => 
-                u.id === 'self_replicating_assembler' 
-                ? { ...u, owned: newOwned, cost: newCost } 
-                : u
-            ));
-            setStats(prev => ({ ...prev, sra_progress: prev.sra_progress - newUnits }));
-            addNotification(`+${newUnits} Self-Replicating Assembler`);
-        }
-    }
-  }, [stats.sra_progress, upgrades, addNotification]);
-
   // Effect to check for new unlocks
   useEffect(() => {
     const newUnlocked = new Set(unlockedUpgrades);
@@ -535,36 +523,24 @@ const App: React.FC = () => {
   }, [bonuses.click]);
 
   const handleBuyUpgrade = useCallback((upgradeId: string) => {
-    setUpgrades(prevUpgrades => {
-      const u = prevUpgrades.find(u => u.id === upgradeId);
-      if (!u) return prevUpgrades;
-      const canAfford = Object.entries(u.cost).every(([res, amt]) => resources[res as ResourceType] >= amt);
-      if (!canAfford) return prevUpgrades;
-      
-      soundManager.playSoundEffect('buy');
+    const u = upgrades.find(u => u.id === upgradeId);
+    if (!u) return;
 
-      setResources(prevRes => {
-          const newRes = {...prevRes};
-          Object.entries(u.cost).forEach(([res, amt]) => { newRes[res as ResourceType] -= amt });
-          return newRes;
-      });
-      
-      return prevUpgrades.map(up => {
-        if (up.id === upgradeId) {
-          const newOwned = up.owned + 1;
-          const newCost = { ...up.baseCost };
-          for (const key in newCost) {
-            const resource = key as ResourceType;
-            if (up.baseCost[resource] > 0) {
-                newCost[resource] = Math.ceil(up.baseCost[resource] * Math.pow(up.costMultiplier, newOwned));
-            }
-          }
-          return { ...up, owned: newOwned, cost: newCost };
-        }
-        return up;
-      });
+    const canAfford = Object.entries(u.cost).every(([res, amt]) => resources[res as ResourceType] >= amt);
+    if (!canAfford) return;
+    
+    soundManager.playSoundEffect('buy');
+
+    setResources(prevRes => {
+        const newRes = {...prevRes};
+        Object.entries(u.cost).forEach(([res, amt]) => { newRes[res as ResourceType] -= amt });
+        return newRes;
     });
-  }, [resources]);
+    
+    setUpgrades(prevUpgrades => prevUpgrades.map(up => 
+      up.id === upgradeId ? { ...up, owned: up.owned + 1 } : up
+    ));
+  }, [resources, upgrades]);
 
   const handleLevelUpUpgrade = useCallback((upgradeId: string) => {
     const u = upgrades.find(up => up.id === upgradeId);
@@ -619,14 +595,39 @@ const App: React.FC = () => {
     const fragmentsToBank = Math.floor(resources.dyson_fragments);
     
     setPrestigePoints(prev => prev + fragmentsToBank);
-    setStats(prev => ({ ...prev, total_prestiges: (prev.total_prestiges || 0) + 1, sra_progress: 0 }));
-    setResources(INITIAL_RESOURCES);
+    setStats(prev => ({ ...prev, total_prestiges: (prev.total_prestiges || 0) + 1 }));
+    
+    const newResources = {...INITIAL_RESOURCES};
+    const startingOreUpgrade = prestigeUpgrades['starting_ore'];
+    if (startingOreUpgrade > 0) {
+        const config = PRESTIGE_UPGRADES_CONFIG.find(p => p.id === 'starting_ore');
+        if (config) {
+            newResources.ore = config.value(startingOreUpgrade);
+        }
+    }
+    setResources(newResources);
+    
     setUpgrades(UPGRADES_CONFIG);
     setUnlockedUpgrades(new Set(['auto_miner']));
     setCompletedResearch(new Set());
     setVictoryAcknowledged(false);
     addNotification(`Prestiged for ${fragmentsToBank} bonus points!`);
-  }, [resources.dyson_fragments, addNotification]);
+  }, [resources.dyson_fragments, addNotification, prestigeUpgrades]);
+
+  const handleBuyPrestigeUpgrade = useCallback((upgradeId: string) => {
+    const config = PRESTIGE_UPGRADES_CONFIG.find(p => p.id === upgradeId);
+    if (!config) return;
+
+    const currentLevel = prestigeUpgrades[upgradeId] || 0;
+    if (currentLevel >= config.maxLevel) return;
+    
+    const cost = config.cost(currentLevel);
+    if (prestigePoints < cost) return;
+    
+    soundManager.playSoundEffect('buy');
+    setPrestigePoints(prev => prev - cost);
+    setPrestigeUpgrades(prev => ({...prev, [upgradeId]: currentLevel + 1}));
+  }, [prestigePoints, prestigeUpgrades]);
 
   const handleClickableEvent = useCallback((event: ClickableEventInstance) => {
     setActiveClickable(null);
@@ -744,7 +745,7 @@ const App: React.FC = () => {
       setVolume(prev => ({...prev, [type]: value }));
   }, []);
   
-  const hasWon = resources.dyson_fragments >= DYSON_SPHERE_GOAL;
+  const hasWon = resources.stellar_essence >= STELLAR_ESSENCE_GOAL;
 
   return (
     <div className="h-full w-full text-white font-sans relative">
@@ -767,10 +768,11 @@ const App: React.FC = () => {
           onBuyUpgrade={handleBuyUpgrade}
           onLevelUpUpgrade={handleLevelUpUpgrade}
           onBuyResearch={handleBuyResearch}
+          onBuyPrestigeUpgrade={handleBuyPrestigeUpgrade}
           dysonFragments={resources.dyson_fragments}
           clickBonus={bonuses.click}
           prestigePoints={prestigePoints}
-          prestigeBonusPerPoint={bonuses.prestige}
+          prestigeUpgrades={prestigeUpgrades}
           onPrestige={handlePrestige}
           rps={rps}
           activeBoosts={activeBoosts}
@@ -780,7 +782,7 @@ const App: React.FC = () => {
           onOpenHelp={() => setIsHelpOpen(true)}
           calculatedPPS={calculatedPPS}
           calculatedCPS={calculatedCPS}
-          goal={DYSON_SPHERE_GOAL}
+          goal={STELLAR_ESSENCE_GOAL}
           resourceFlash={resourceFlash}
         />
       )}

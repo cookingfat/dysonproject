@@ -1,5 +1,6 @@
 import React from 'react';
 import { Research, Resources } from '../types';
+import { formatNumber } from '../utils';
 
 interface ResearchItemProps {
   research: Research;
@@ -17,7 +18,7 @@ const ResearchItem: React.FC<ResearchItemProps> = ({ research, resources, isComp
   const canAfford = resources[research.cost.resource] >= research.cost.amount;
   const isExotic = research.tags?.includes('exotic');
 
-  const costText = `${research.cost.amount.toLocaleString()} ${RESOURCE_SHORT_NAMES[research.cost.resource] || research.cost.resource}`;
+  const costText = `${formatNumber(research.cost.amount)} ${RESOURCE_SHORT_NAMES[research.cost.resource] || research.cost.resource}`;
 
   return (
     <div 
@@ -38,7 +39,7 @@ const ResearchItem: React.FC<ResearchItemProps> = ({ research, resources, isComp
       <button
         onClick={() => onBuy(research.id)}
         disabled={!canAfford || isCompleted}
-        className="text-black w-full sm:w-auto font-bold py-2 px-5 rounded-md transition-all duration-200 clip-corner-sm
+        className="text-black w-full sm:w-auto font-bold py-2 px-5 rounded-md transition-all duration-200 clip-corner-sm min-w-[150px]
                    disabled:bg-gray-600/50 disabled:cursor-not-allowed disabled:text-gray-400
                    bg-cyan-500 hover:bg-cyan-400"
       >

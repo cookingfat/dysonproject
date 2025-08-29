@@ -1,7 +1,7 @@
 /**
  * Defines the types of resources available in the game.
  */
-export type ResourceType = 'energy' | 'ore' | 'parts' | 'dyson_fragments' | 'research_points';
+export type ResourceType = 'energy' | 'ore' | 'parts' | 'dyson_fragments' | 'research_points' | 'condensed_fragments' | 'stellar_essence';
 
 /**
  * A record mapping each resource type to its amount.
@@ -63,8 +63,6 @@ export interface Upgrade {
   synergies?: Synergy[];
   /** The current tier/level of the upgrade. */
   level: number;
-  /** Special behaviors for certain upgrades. */
-  specialEffect?: 'self_replicating';
 }
 
 /**
@@ -193,4 +191,21 @@ export interface ClickableEventConfig {
         type: 'click_multiplier';
         value: number;
     }
+}
+
+/**
+ * Represents a single upgrade in the Prestige Tree.
+ */
+export interface PrestigeUpgrade {
+  id: string;
+  name: string;
+  description: (level: number, value: number) => string;
+  maxLevel: number;
+  /** Cost in prestige points for the next level. */
+  cost: (level: number) => number; 
+  type: 'production_multiplier' | 'click_multiplier' | 'cost_reduction';
+  /** The target of the bonus. Can be a ResourceType, a tag, 'click', or 'all_buildings'. */
+  target: string;
+  /** The bonus value for the current level. For multipliers, this is a percentage (e.g., 0.05 for 5%). */
+  value: (level: number) => number;
 }
