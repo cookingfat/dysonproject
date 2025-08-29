@@ -152,8 +152,7 @@ body {
 
 /* Custom Tooltip Styles */
 .custom-tooltip {
-  @apply absolute z-50 px-3 py-2 text-sm text-center font-semibold text-white bg-[#0A0F1E] rounded-md shadow-lg
-         opacity-0 group-hover:opacity-100 transition-opacity duration-200 ease-in-out
+  @apply z-50 px-3 py-2 text-sm text-center font-semibold text-white bg-[#0A0F1E] rounded-md shadow-lg
          pointer-events-none w-max max-w-xs backdrop-blur-sm bg-opacity-90;
   border: 1px solid var(--color-primary);
 }
