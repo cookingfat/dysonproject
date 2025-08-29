@@ -522,7 +522,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'global_production_boost',
         name: 'Global Production Boost',
-        description: (level, value) => `Increases all resource production by ${((value - 1) * 100).toFixed(0)}%.`,
+        description: (_level, value) => `Increases all resource production by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 20,
         cost: level => 1 + Math.floor(Math.pow(level, 1.5)),
         type: 'production_multiplier',
@@ -532,7 +532,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'click_power_boost',
         name: 'Click Power',
-        description: (level, value) => `Increases manual click power by ${((value - 1) * 100).toFixed(0)}%.`,
+        description: (_level, value) => `Increases manual click power by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 10,
         cost: level => 2 * (level + 1),
         type: 'click_multiplier',
@@ -542,7 +542,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'building_cost_reduction',
         name: 'Engineering Efficiency',
-        description: (level, value) => `Reduces the cost of all buildings by ${(100 - value * 100).toFixed(1)}%.`,
+        description: (_level, value) => `Reduces the cost of all buildings by ${(100 - value * 100).toFixed(1)}%.`,
         maxLevel: 10,
         cost: level => 5 + Math.floor(Math.pow(level, 2)),
         type: 'cost_reduction',
@@ -552,7 +552,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'starting_ore',
         name: 'Geological Survey',
-        description: (level, value) => `Start each prestige with ${value.toLocaleString()} extra ore.`,
+        description: (_level, value) => `Start each prestige with ${value.toLocaleString()} extra ore.`,
         maxLevel: 5,
         cost: level => 1 * (level + 1),
         type: 'production_multiplier', // Note: This is a special case handled in prestige logic
@@ -562,7 +562,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'miner_production_boost',
         name: 'Mining Guild Charter',
-        description: (level, value) => `Increases production of all 'miner' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
+        description: (_level, value) => `Increases production of all 'miner' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 15,
         cost: level => 2 + level,
         type: 'production_multiplier',
@@ -572,7 +572,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'power_production_boost',
         name: 'Energy Grid Optimization',
-        description: (level, value) => `Increases production of all 'power' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
+        description: (_level, value) => `Increases production of all 'power' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 15,
         cost: level => 2 + level,
         type: 'production_multiplier',
@@ -582,7 +582,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
     {
         id: 'factory_production_boost',
         name: 'Factory Overclock',
-        description: (level, value) => `Increases production of all 'factory' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
+        description: (_level, value) => `Increases production of all 'factory' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 15,
         cost: level => 2 + level,
         type: 'production_multiplier',
