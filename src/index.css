@@ -222,3 +222,18 @@ body {
 .animate-pulse-gold {
   animation: pulse-gold 1.5s ease-in-out infinite;
 }
+
+/* Glow/Throb for Research Tab */
+@keyframes throb-text {
+  0%, 100% {
+    text-shadow: 0 0 4px rgba(0, 229, 255, 0.4);
+    color: #a5f3fc; /* Tailwind cyan-200 */
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(0, 229, 255, 0.8);
+    color: #f0f9ff; /* Tailwind sky-50 */
+  }
+}
+.animate-throb {
+  animation: throb-text 1.5s ease-in-out infinite;
+}

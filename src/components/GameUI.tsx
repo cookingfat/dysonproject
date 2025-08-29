@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Upgrade, Resources, ActiveBoost, ResourceType } from '../types';
+import { RESEARCH_CONFIG } from '../constants';
 import ResourceDisplay from './ResourceDisplay';
 import Clicker from './Clicker';
 import UpgradeShop from './UpgradeShop';
@@ -37,14 +38,14 @@ interface GameUIProps {
   isRichVeinActive: boolean;
 }
 
-const TabButton: React.FC<{ name: string; active: boolean; onClick: () => void }> = ({ name, active, onClick }) => (
+const TabButton: React.FC<{ name: string; active: boolean; onClick: () => void; isGlowing?: boolean }> = ({ name, active, onClick, isGlowing }) => (
     <button
         onClick={onClick}
         className={`px-8 py-2 text-lg font-bold transition-colors border-b-4 relative top-px ${
             active
                 ? 'bg-[#0A0F1E]/50 text-cyan-300 border-cyan-400'
                 : 'bg-transparent text-gray-400 hover:bg-[#0A0F1E]/70 hover:text-cyan-400 border-transparent'
-        }`}
+        } ${isGlowing && !active ? 'animate-throb' : ''}`}
         style={{ clipPath: 'polygon(10px 0, calc(100% - 10px) 0, 100% 100%, 0% 100%)' }}
         aria-selected={active}
         role="tab"
@@ -65,6 +66,20 @@ const GameUI: React.FC<GameUIProps> = (props) => {
   const hasResearchLab = upgrades.some(u => u.id === 'research_lab' && u.owned > 0);
   const prestigeUnlocked = upgrades.some(u => u.id === 'fabricator' && u.owned > 0);
   const abilitiesUnlocked = upgrades.some(u => u.id === 'solar_panel' && u.owned > 0);
+
+  const researchIsPurchasable = useMemo(() => {
+    if (!hasResearchLab) return false;
+    return RESEARCH_CONFIG.some(research => {
+        const isCompleted = completedResearch.has(research.id);
+        if (isCompleted) return false;
+
+        const prerequisitesMet = !research.prerequisites || research.prerequisites.every(reqId => completedResearch.has(reqId));
+        if (!prerequisitesMet) return false;
+
+        const canAfford = resources[research.cost.resource] >= research.cost.amount;
+        return canAfford;
+    });
+  }, [resources, completedResearch, hasResearchLab]);
 
   return (
     <div className="h-full w-full max-w-7xl mx-auto flex flex-col p-4 gap-4">
@@ -116,6 +131,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
                     cooldowns={cooldowns}
                     resources={resources}
                     onActivateAbility={onActivateAbility}
+                    hasResearchLab={hasResearchLab}
                 />
             </div>
           )}
@@ -127,7 +143,7 @@ const GameUI: React.FC<GameUIProps> = (props) => {
           
             <div className="flex-shrink-0 flex justify-center border-b-2 border-gray-700/50" role="tablist">
               <TabButton name="Upgrades" active={activeTab === 'upgrades'} onClick={() => setActiveTab('upgrades')} />
-              {hasResearchLab && <TabButton name="Research" active={activeTab === 'research'} onClick={() => setActiveTab('research')} />}
+              {hasResearchLab && <TabButton name="Research" active={activeTab === 'research'} onClick={() => setActiveTab('research')} isGlowing={researchIsPurchasable} />}
               <TabButton name="Achievements" active={activeTab === 'achievements'} onClick={() => setActiveTab('achievements')} />
             </div>
           
