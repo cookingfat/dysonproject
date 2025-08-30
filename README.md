@@ -65,3 +65,54 @@ LocalStorage Save System – Automatic periodic saves + export/import
 
 📦 Getting Started
 1. Clone the Repository
+git clone https://github.com/cookingfat/dysonproject.git
+cd dysonproject
+
+2. Install Dependencies
+npm install
+
+3. Run the Development Server
+npm run dev
+Visit http://localhost:5173
+
+🎮 Gameplay
+
+Click Ore to start your resource base.
+
+Buy Upgrades to automate production.
+
+Research Tech to improve efficiency and unlock synergies.
+
+Prestige with Dyson Fragments to gain permanent power.
+
+Survive random events and use abilities strategically.
+
+Accumulate Stellar Essence to complete the Stellar Forge and win!
+
+💾 Saving & Loading
+
+Autosaves every 5 seconds.
+
+Supports exporting your save to file.
+
+Supports importing save files to continue across devices.
+
+📸 Screenshots / Demo
+
+(Add screenshots or GIFs here to show off your UI and glowing space theme!)
+
+🤝 Contributing
+
+Contributions, bug reports, and feature requests are welcome!
+
+Fork the repo
+
+Create a branch (git checkout -b feature/my-feature)
+
+Commit changes
+
+Open a Pull Request
+
+📜 License
+
+MIT License – free to play, expand, and share.
