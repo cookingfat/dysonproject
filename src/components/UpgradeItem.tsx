@@ -31,7 +31,8 @@ const Requirements: React.FC<{ upgrade: Upgrade; allUpgrades: Upgrade[] }> = ({ 
 
     const resourceReqs = Object.entries(upgrade.unlocksAt.resources || {}).map(([res, amount]) => {
         const metaName = res.charAt(0).toUpperCase() + res.slice(1).replace(/_/g, ' ');
-        return <li key={res}>{`Have ${formatNumber(amount || 0)} ${metaName}`}</li>;
+// FIX: Explicitly convert 'amount' to a number before passing to formatNumber.
+        return <li key={res}>{`Have ${formatNumber(Number(amount || 0))} ${metaName}`}</li>;
     });
 
     if (ownedReqs.length === 0 && resourceReqs.length === 0) return null;
@@ -49,7 +50,7 @@ const Requirements: React.FC<{ upgrade: Upgrade; allUpgrades: Upgrade[] }> = ({ 
 
 const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, onLevelUp, allUpgrades, calculatedPPS, calculatedCPS, isLocked = false }) => {
   const canAffordBuy = Object.entries(upgrade.cost).every(([res, amount]) => {
-    return resources[res as ResourceType] >= amount;
+    return resources[res as ResourceType] >= Number(amount);
   });
 
   const levelUpCost: Partial<Resources> = {};
@@ -71,12 +72,14 @@ const UpgradeItem: React.FC<UpgradeItemProps> = ({ upgrade, resources, onBuy, on
 
   const unitProduction = calculatedPPS[upgrade.id] || upgrade.production;
   const productionText = Object.entries(unitProduction)
-    .map(([res, amount]) => `▲ +${formatNumber(amount ?? 0)} ${res}/s`)
+// FIX: Explicitly convert 'amount' to a number before passing to formatNumber.
+    .map(([res, amount]) => `▲ +${formatNumber(Number(amount ?? 0))} ${res}/s`)
     .join(', ');
 
   const unitConsumption = calculatedCPS[upgrade.id] || upgrade.consumption;
   const consumptionText = Object.entries(unitConsumption)
-    .map(([res, amount]) => `▼ -${formatNumber(amount ?? 0)} ${res}/s`)
+// FIX: Explicitly convert 'amount' to a number before passing to formatNumber.
+    .map(([res, amount]) => `▼ -${formatNumber(Number(amount ?? 0))} ${res}/s`)
     .join(', ');
 
   const canAffordAnything = canAffordBuy || canAffordLevelUp;

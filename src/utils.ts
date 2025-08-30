@@ -29,6 +29,16 @@ export const formatNumber = (num: number): string => {
     return scaled.toFixed(2) + suffix;
 };
 
+const RESOURCE_ORDER: ResourceType[] = [
+    'ore',
+    'energy',
+    'parts',
+    'research_points',
+    'dyson_fragments',
+    'condensed_fragments',
+    'stellar_essence',
+];
+
 export const formatResourceCost = (cost: Partial<Resources>): string => {
     const RESOURCE_ICONS: Record<string, string> = {
         ore: '⛏️',
@@ -41,8 +51,18 @@ export const formatResourceCost = (cost: Partial<Resources>): string => {
         prestige_points: '✨'
     };
 
-    return Object.entries(cost)
+    const sortedCostEntries = Object.entries(cost)
         .filter(([, amount]) => (amount ?? 0) > 0)
+        .sort(([resA], [resB]) => {
+            const indexA = RESOURCE_ORDER.indexOf(resA as ResourceType);
+            const indexB = RESOURCE_ORDER.indexOf(resB as ResourceType);
+            if (indexA === -1 && indexB === -1) return 0;
+            if (indexA === -1) return 1;
+            if (indexB === -1) return -1;
+            return indexA - indexB;
+        });
+
+    return sortedCostEntries
         .map(([res, amount]) => `${formatNumber(amount!)} ${RESOURCE_ICONS[res as ResourceType] || res}`)
         .join(' ');
 };

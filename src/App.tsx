@@ -283,7 +283,8 @@ const App: React.FC = () => {
 
         const unitProduction: Partial<Resources> = {};
         Object.entries(u.production).forEach(([res, amount]) => {
-            unitProduction[res as ResourceType] = amount * researchMultiplier * prestigeBonus * boostMultiplier * levelBonus;
+// FIX: Ensure 'amount' is treated as a number for arithmetic operations.
+            unitProduction[res as ResourceType] = (amount || 0) * researchMultiplier * prestigeBonus * boostMultiplier * levelBonus;
         });
         newPPS[u.id] = unitProduction;
 
@@ -302,7 +303,8 @@ const App: React.FC = () => {
 
         const unitConsumption: Partial<Resources> = {};
         Object.entries(u.consumption).forEach(([res, amount]) => {
-            unitConsumption[res as ResourceType] = amount * consumptionMultiplier;
+// FIX: Ensure 'amount' is treated as a number for arithmetic operations.
+            unitConsumption[res as ResourceType] = (amount || 0) * consumptionMultiplier;
         });
         newCPS[u.id] = unitConsumption;
     });
@@ -372,17 +374,18 @@ const App: React.FC = () => {
         upgrades.forEach(u => {
             if (u.owned > 0) {
                 const unitConsumption = calculatedCPS[u.id] || {};
-                const canAfford = Object.entries(unitConsumption).every(([res, amount]) => resources[res as ResourceType] >= (amount! * u.owned) / 10);
+// FIX: Ensure 'amount' is treated as a number for arithmetic operations.
+                const canAfford = Object.entries(unitConsumption).every(([res, amount]) => resources[res as ResourceType] >= ((amount || 0) * u.owned) / 10);
 
                 if (canAfford) {
                     const upgradeProduction = productionFromUpgrade.get(u.id) || {};
                     Object.entries(upgradeProduction).forEach(([res, amount]) => {
-                        netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) + amount / 10;
+                        netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) + (amount || 0) / 10;
                         const statKey = `total_${res}`;
-                        totalProductionThisTick[statKey] = (totalProductionThisTick[statKey] || 0) + amount / 10;
+                        totalProductionThisTick[statKey] = (totalProductionThisTick[statKey] || 0) + (amount || 0) / 10;
                     });
                     Object.entries(unitConsumption).forEach(([res, amount]) => {
-                        netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) - (amount! * u.owned) / 10;
+                        netChangePerTick[res as ResourceType] = (netChangePerTick[res as ResourceType] ?? 0) - ((amount || 0) * u.owned) / 10;
                     });
                 }
             }
@@ -401,7 +404,8 @@ const App: React.FC = () => {
             const newStats = { ...prev };
             // Add production deltas to totals
             for(const key in totalProductionThisTick) {
-                newStats[key] = (prev[key] || 0) + totalProductionThisTick[key]!;
+// FIX: Ensure value from 'totalProductionThisTick' is treated as a number.
+                newStats[key] = (prev[key] || 0) + (totalProductionThisTick[key] || 0);
             }
             return newStats;
         });
@@ -426,7 +430,8 @@ const App: React.FC = () => {
       if (!newUnlocked.has(upgrade.id) && upgrade.unlocksAt) {
         const conditionsMet = Object.entries(upgrade.unlocksAt.owned || {}).every(([reqId, reqAmount]) => {
             const owned = upgrades.find(u => u.id === reqId)?.owned || 0;
-            return owned >= reqAmount;
+// FIX: Explicitly convert 'reqAmount' to a number to satisfy TypeScript's type checker for the comparison.
+            return owned >= Number(reqAmount);
         }) && Object.entries(upgrade.unlocksAt.resources || {}).every(([res, reqAmount]) => resources[res as ResourceType] >= (reqAmount || 0));
         
         if (conditionsMet) {
@@ -526,14 +531,16 @@ const App: React.FC = () => {
     const u = upgrades.find(u => u.id === upgradeId);
     if (!u) return;
 
-    const canAfford = Object.entries(u.cost).every(([res, amt]) => resources[res as ResourceType] >= amt);
+// FIX: Explicitly convert 'amt' to a number due to Object.entries's loose typing.
+    const canAfford = Object.entries(u.cost).every(([res, amt]) => resources[res as ResourceType] >= Number(amt));
     if (!canAfford) return;
     
     soundManager.playSoundEffect('buy');
 
     setResources(prevRes => {
         const newRes = {...prevRes};
-        Object.entries(u.cost).forEach(([res, amt]) => { newRes[res as ResourceType] -= amt });
+// FIX: Explicitly convert 'amt' to a number for the subtraction.
+        Object.entries(u.cost).forEach(([res, amt]) => { newRes[res as ResourceType] -= Number(amt) });
         return newRes;
     });
     
@@ -561,14 +568,16 @@ const App: React.FC = () => {
         levelUpCost.energy = 25 * u.level;
     }
 
-    const canAfford = Object.entries(levelUpCost).every(([res, amt]) => resources[res as ResourceType] >= amt!);
+// FIX: Ensure 'amt' is treated as a number, handling potential 'undefined' from Partial<Resources>.
+    const canAfford = Object.entries(levelUpCost).every(([res, amt]) => resources[res as ResourceType] >= (amt || 0));
     if (!canAfford) return;
     
     soundManager.playSoundEffect('level-up');
 
     setResources(prev => {
         const newRes = {...prev};
-        Object.entries(levelUpCost).forEach(([res, amt]) => { newRes[res as ResourceType] -= amt! });
+// FIX: Ensure 'amt' is treated as a number for the subtraction.
+        Object.entries(levelUpCost).forEach(([res, amt]) => { newRes[res as ResourceType] -= (amt || 0) });
         return newRes;
     });
     
@@ -652,7 +661,8 @@ const App: React.FC = () => {
 
     if ((cooldowns[abilityId] || 0) > Date.now()) return;
 
-    const canAfford = Object.entries(ability.cost).every(([res, amt]) => resources[res as ResourceType] >= (amt ?? 0));
+// FIX: Explicitly convert amount to a number to prevent type errors.
+    const canAfford = Object.entries(ability.cost).every(([res, amt]) => resources[res as ResourceType] >= Number(amt ?? 0));
     if(!canAfford) return;
     
     // Play sound
@@ -672,7 +682,8 @@ const App: React.FC = () => {
     setResources(prev => {
         const newRes = { ...prev };
         for (const res in ability.cost) {
-            newRes[res as ResourceType] -= ability.cost[res as ResourceType] ?? 0;
+// FIX: Explicitly convert amount to a number to prevent type errors.
+            newRes[res as ResourceType] -= Number(ability.cost[res as ResourceType] ?? 0);
         }
         return newRes;
     });
@@ -687,13 +698,15 @@ const App: React.FC = () => {
             const newRes = { ...prev };
             if (instantAbility.gain) {
                 for(const res in instantAbility.gain) {
-                     newRes[res as ResourceType] += instantAbility.gain[res as ResourceType] ?? 0;
+// FIX: Explicitly convert amount to a number to prevent type errors.
+                     newRes[res as ResourceType] += Number(instantAbility.gain[res as ResourceType] ?? 0);
                 }
             }
             if (instantAbility.gainSeconds) {
                 for (const res in instantAbility.gainSeconds) {
                     const resource = res as ResourceType;
-                    const seconds = instantAbility.gainSeconds[resource] ?? 0;
+// FIX: Explicitly convert amount to a number to prevent type errors.
+                    const seconds = Number(instantAbility.gainSeconds[resource] ?? 0);
                     const gainAmount = (rps[resource] || 0) * seconds;
                     newRes[resource] += gainAmount;
                 }
