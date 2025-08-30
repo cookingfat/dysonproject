@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Scene, Upgrade, Resources, ResourceType, Stats, ActiveBoost } from './types';
 import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG, STELLAR_ESSENCE_GOAL, PRESTIGE_UPGRADES_CONFIG } from './constants';
@@ -11,9 +12,10 @@ import OptionsMenu from './components/OptionsMenu';
 import VictoryScreen from './components/VictoryScreen';
 import HelpModal from './components/HelpModal';
 import { soundManager, SfxType } from './soundManager';
+import { encodeSaveData, decodeSaveData } from './saveManager';
 
 
-const SAVE_KEY = 'projectDysonSaveData_v2'; // Incremented version for new save structure
+const SAVE_KEY = 'projectDysonSaveData_v3'; // Incremented version for new save structure
 
 interface Notification {
   id: number;
@@ -74,72 +76,80 @@ const App: React.FC = () => {
   // Load game from localStorage
   useEffect(() => {
     if (isLoaded.current) return;
-    
-    const savedDataRaw = localStorage.getItem(SAVE_KEY);
-    if (savedDataRaw) {
-      try {
-        const savedData = JSON.parse(savedDataRaw);
-        
-        // Offline Progress Calculation
-        const lastSaveTime = savedData.lastSaveTime || Date.now();
-        const offlineSeconds = Math.min(Math.floor((Date.now() - lastSaveTime) / 1000), 8 * 60 * 60); // Max 8 hours
-        const savedRps = savedData.rps || {};
-        let totalGains: Partial<Resources> = {};
-        if (offlineSeconds > 10) { // Only calculate if offline for more than 10s
-            for (const key in savedRps) {
-                const rpsVal = savedRps[key as ResourceType] || 0;
-                if (rpsVal > 0) { // Only gain resources, don't lose them
-                    totalGains[key as ResourceType] = (totalGains[key as ResourceType] || 0) + rpsVal * offlineSeconds;
-                }
-            }
-            const startingResources = savedData.resources || INITIAL_RESOURCES;
-            const newResources = {...startingResources};
-            for(const key in totalGains) {
-                newResources[key as ResourceType] = (newResources[key as ResourceType] || 0) + totalGains[key as ResourceType]!;
-            }
-            setResources(newResources);
-            if(Object.keys(totalGains).length > 0) {
-               setOfflineGains(totalGains);
-            }
-        } else {
-            if (savedData.resources) setResources(savedData.resources);
-        }
-
-        if (savedData.unlockedUpgrades) setUnlockedUpgrades(new Set(savedData.unlockedUpgrades));
-        if (savedData.completedResearch) setCompletedResearch(new Set(savedData.completedResearch));
-        if (savedData.unlockedAchievements) setUnlockedAchievements(new Set(savedData.unlockedAchievements));
-        if (savedData.prestigePoints) setPrestigePoints(savedData.prestigePoints);
-        if (savedData.prestigeUpgrades) setPrestigeUpgrades(savedData.prestigeUpgrades || {});
-        if (savedData.stats) setStats(savedData.stats);
-        if (savedData.cooldowns) setCooldowns(savedData.cooldowns);
-        if (savedData.victoryAcknowledged) setVictoryAcknowledged(savedData.victoryAcknowledged);
-        if (savedData.volume) {
-            if(typeof savedData.volume.master === 'number' && typeof savedData.volume.music === 'number' && typeof savedData.volume.sfx === 'number') {
-                setVolume(savedData.volume);
-            }
-        }
-
-        if (savedData.upgrades) {
-          const loadedUpgrades = UPGRADES_CONFIG.map(configUpgrade => {
-            const savedUpgrade = savedData.upgrades.find((u: { id: string }) => u.id === configUpgrade.id);
-            if (savedUpgrade) {
-              return { ...configUpgrade, owned: savedUpgrade.owned, cost: configUpgrade.cost, level: savedUpgrade.level || 1 };
-            }
-            return configUpgrade;
-          });
-          setUpgrades(loadedUpgrades);
-        }
-      } catch (e) {
-        console.error("Failed to load saved game:", e);
-        localStorage.removeItem(SAVE_KEY);
-      }
-    }
     isLoaded.current = true;
-  }, []);
+
+    const loadGame = async () => {
+        const savedDataRaw = localStorage.getItem(SAVE_KEY);
+        if (savedDataRaw) {
+          try {
+            const savedData = await decodeSaveData(savedDataRaw);
+            if (savedData) {
+              // Offline Progress Calculation
+              const lastSaveTime = savedData.lastSaveTime || Date.now();
+              const offlineSeconds = Math.min(Math.floor((Date.now() - lastSaveTime) / 1000), 8 * 60 * 60); // Max 8 hours
+              const savedRps = savedData.rps || {};
+              let totalGains: Partial<Resources> = {};
+              if (offlineSeconds > 10) { // Only calculate if offline for more than 10s
+                  for (const key in savedRps) {
+                      const rpsVal = savedRps[key as ResourceType] || 0;
+                      if (rpsVal > 0) { // Only gain resources, don't lose them
+                          totalGains[key as ResourceType] = (totalGains[key as ResourceType] || 0) + rpsVal * offlineSeconds;
+                      }
+                  }
+                  const startingResources = savedData.resources || INITIAL_RESOURCES;
+                  const newResources = {...startingResources};
+                  for(const key in totalGains) {
+                      newResources[key as ResourceType] = (newResources[key as ResourceType] || 0) + totalGains[key as ResourceType]!;
+                  }
+                  setResources(newResources);
+                  if(Object.keys(totalGains).length > 0) {
+                     setOfflineGains(totalGains);
+                  }
+              } else {
+                  if (savedData.resources) setResources(savedData.resources);
+              }
+
+              if (savedData.unlockedUpgrades) setUnlockedUpgrades(new Set(savedData.unlockedUpgrades));
+              if (savedData.completedResearch) setCompletedResearch(new Set(savedData.completedResearch));
+              if (savedData.unlockedAchievements) setUnlockedAchievements(new Set(savedData.unlockedAchievements));
+              if (savedData.prestigePoints) setPrestigePoints(savedData.prestigePoints);
+              if (savedData.prestigeUpgrades) setPrestigeUpgrades(savedData.prestigeUpgrades || {});
+              if (savedData.stats) setStats(savedData.stats);
+              if (savedData.cooldowns) setCooldowns(savedData.cooldowns);
+              if (savedData.victoryAcknowledged) setVictoryAcknowledged(savedData.victoryAcknowledged);
+              if (savedData.volume) {
+                  if(typeof savedData.volume.master === 'number' && typeof savedData.volume.music === 'number' && typeof savedData.volume.sfx === 'number') {
+                      setVolume(savedData.volume);
+                  }
+              }
+
+              if (savedData.upgrades) {
+                const loadedUpgrades = UPGRADES_CONFIG.map(configUpgrade => {
+                  const savedUpgrade = savedData.upgrades.find((u: { id: string }) => u.id === configUpgrade.id);
+                  if (savedUpgrade) {
+                    return { ...configUpgrade, owned: savedUpgrade.owned, cost: configUpgrade.cost, level: savedUpgrade.level || 1 };
+                  }
+                  return configUpgrade;
+                });
+                setUpgrades(loadedUpgrades);
+              }
+            } else {
+              addNotification("Save data was corrupted. Starting fresh.");
+              localStorage.removeItem(SAVE_KEY);
+            }
+          } catch (e) {
+            console.error("Failed to load saved game:", e);
+            localStorage.removeItem(SAVE_KEY);
+          }
+        }
+    };
+    
+    loadGame();
+  }, [addNotification]);
 
   // Save game to localStorage periodically
   useEffect(() => {
-    const saveInterval = setInterval(() => {
+    const saveInterval = setInterval(async () => {
       if (scene !== 'game') return;
       const dataToSave = {
         resources,
@@ -156,7 +166,12 @@ const App: React.FC = () => {
         victoryAcknowledged,
         lastSaveTime: Date.now(),
       };
-      localStorage.setItem(SAVE_KEY, JSON.stringify(dataToSave));
+      try {
+          const encodedData = await encodeSaveData(dataToSave);
+          localStorage.setItem(SAVE_KEY, encodedData);
+      } catch (e) {
+        console.error("Failed to save game during interval:", e);
+      }
     }, 5000);
 
     return () => clearInterval(saveInterval);
@@ -550,7 +565,7 @@ const App: React.FC = () => {
   }, [resources, upgrades]);
 
   const handleLevelUpUpgrade = useCallback((upgradeId: string) => {
-    const u = upgrades.find(up => up.id === upgradeId);
+    const u = upgrades.find(up => u.id === upgradeId);
     if (!u || u.owned < 1) return;
 
     const levelUpCost: Partial<Resources> = {};
@@ -757,6 +772,62 @@ const App: React.FC = () => {
   const handleVolumeChange = useCallback((type: 'master' | 'music' | 'sfx', value: number) => {
       setVolume(prev => ({...prev, [type]: value }));
   }, []);
+
+  const handleExportSave = useCallback(async () => {
+    const dataToSave = {
+        resources,
+        upgrades: upgrades.map(u => ({ id: u.id, owned: u.owned, level: u.level })),
+        unlockedUpgrades: Array.from(unlockedUpgrades),
+        completedResearch: Array.from(completedResearch),
+        unlockedAchievements: Array.from(unlockedAchievements),
+        prestigePoints,
+        prestigeUpgrades,
+        stats,
+        rps,
+        cooldowns,
+        volume,
+        victoryAcknowledged,
+        lastSaveTime: Date.now(),
+    };
+    try {
+        const encodedData = await encodeSaveData(dataToSave);
+        const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `project-dyson-save-${Date.now()}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        addNotification("Game saved to file!");
+    } catch (e) {
+        console.error("Failed to export save:", e);
+        addNotification("Error exporting save file.");
+    }
+  }, [resources, upgrades, unlockedUpgrades, completedResearch, unlockedAchievements, prestigePoints, prestigeUpgrades, stats, rps, cooldowns, volume, victoryAcknowledged, addNotification]);
+
+  const handleImportSave = useCallback(async (saveString: string) => {
+    if (!saveString.trim()) {
+        addNotification("Import data cannot be empty.");
+        return;
+    };
+    try {
+        const decodedData = await decodeSaveData(saveString);
+        if (decodedData) {
+            // Re-encode to ensure it's in the latest format and store it
+            const encodedData = await encodeSaveData(decodedData);
+            localStorage.setItem(SAVE_KEY, encodedData);
+            addNotification("Import successful! Reloading...");
+            setTimeout(() => window.location.reload(), 1500);
+        } else {
+            addNotification("Invalid or corrupt save file.");
+        }
+    } catch (e) {
+        console.error("Failed to import save:", e);
+        addNotification("Error importing save file.");
+    }
+  }, [addNotification]);
   
   const hasWon = resources.stellar_essence >= STELLAR_ESSENCE_GOAL;
 
@@ -765,7 +836,7 @@ const App: React.FC = () => {
       <Notifications notifications={notifications} />
       {offlineGains && <OfflineProgressModal gains={offlineGains} onClose={handleCloseOfflineModal} />}
       {activeClickable && <ClickableEvent event={activeClickable} onClick={handleClickableEvent} />}
-      {isOptionsOpen && <OptionsMenu onClose={() => setIsOptionsOpen(false)} volume={volume} onVolumeChange={handleVolumeChange} />}
+      {isOptionsOpen && <OptionsMenu onClose={() => setIsOptionsOpen(false)} volume={volume} onVolumeChange={handleVolumeChange} onExport={handleExportSave} onImport={handleImportSave} />}
       {isHelpOpen && <HelpModal onClose={() => setIsHelpOpen(false)} />}
       {hasWon && !victoryAcknowledged && <VictoryScreen onContinue={() => setVictoryAcknowledged(true)} onPrestige={handlePrestige} />}
       
