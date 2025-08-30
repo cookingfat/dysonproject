@@ -104,7 +104,11 @@ Supports importing save files to continue across devices.
 
 📸 Screenshots / Demo
 
-(Add screenshots or GIFs here to show off your UI and glowing space theme!)
+![Image](https://github.com/user-attachments/assets/9ef4cb55-e698-4b4b-8e07-22a5fab00cb1)
+
+![Image](https://github.com/user-attachments/assets/f44f8263-54de-4072-b22b-115c77174051)
+
+![Image](https://github.com/user-attachments/assets/cfc6a28a-060c-43bf-bb99-a0438828c9f9)
 
 🤝 Contributing
 
