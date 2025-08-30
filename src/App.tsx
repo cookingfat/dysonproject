@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Scene, Upgrade, Resources, ResourceType, Stats, ActiveBoost } from './types';
 import { UPGRADES_CONFIG, INITIAL_RESOURCES, RESEARCH_CONFIG, STELLAR_ESSENCE_GOAL, PRESTIGE_UPGRADES_CONFIG } from './constants';
@@ -543,19 +544,17 @@ const App: React.FC = () => {
   }, [bonuses.click]);
 
   const handleBuyUpgrade = useCallback((upgradeId: string) => {
-    const u = upgrades.find(u => u.id === upgradeId);
-    if (!u) return;
+    const upgradeToBuy = upgrades.find(u => u.id === upgradeId);
+    if (!upgradeToBuy) return;
 
-// FIX: Explicitly convert 'amt' to a number due to Object.entries's loose typing.
-    const canAfford = Object.entries(u.cost).every(([res, amt]) => resources[res as ResourceType] >= Number(amt));
+    const canAfford = Object.entries(upgradeToBuy.cost).every(([res, amt]) => resources[res as ResourceType] >= Number(amt));
     if (!canAfford) return;
     
     soundManager.playSoundEffect('buy');
 
     setResources(prevRes => {
         const newRes = {...prevRes};
-// FIX: Explicitly convert 'amt' to a number for the subtraction.
-        Object.entries(u.cost).forEach(([res, amt]) => { newRes[res as ResourceType] -= Number(amt) });
+        Object.entries(upgradeToBuy.cost).forEach(([res, amt]) => { newRes[res as ResourceType] -= Number(amt) });
         return newRes;
     });
     
@@ -565,7 +564,7 @@ const App: React.FC = () => {
   }, [resources, upgrades]);
 
   const handleLevelUpUpgrade = useCallback((upgradeId: string) => {
-    const u = upgrades.find(up => u.id === upgradeId);
+    const u = upgrades.find(up => up.id === upgradeId);
     if (!u || u.owned < 1) return;
 
     const levelUpCost: Partial<Resources> = {};
@@ -862,7 +861,7 @@ const App: React.FC = () => {
           activeBoosts={activeBoosts}
           cooldowns={cooldowns}
           onActivateAbility={handleActivateAbility}
-          onOpenOptions={() => setIsOptionsOpen(true)}
+          onOpenOptions={() => setIsOptionsOpen(false)}
           onOpenHelp={() => setIsHelpOpen(true)}
           calculatedPPS={calculatedPPS}
           calculatedCPS={calculatedCPS}
