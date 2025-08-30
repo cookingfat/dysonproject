@@ -1,5 +1,6 @@
 
-const SECRET_KEY = 'a-very-secret-salt-for-project-dyson-42';
+
+const SECRET_KEY = 'a-very-secret-salt-for-the-stellar-forge-42';
 
 /**
  * A simple symmetric cipher function (XOR-based).

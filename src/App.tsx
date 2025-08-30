@@ -16,7 +16,7 @@ import { soundManager, SfxType } from './soundManager';
 import { encodeSaveData, decodeSaveData } from './saveManager';
 
 
-const SAVE_KEY = 'projectDysonSaveData_v3'; // Incremented version for new save structure
+const SAVE_KEY = 'stellarForgeSaveData_v1'; // Renamed and version reset for new game name
 
 interface Notification {
   id: number;
@@ -794,7 +794,7 @@ const App: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `project-dyson-save-${Date.now()}.txt`;
+        link.download = `the-stellar-forge-save-${Date.now()}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -10,7 +10,7 @@ export const INITIAL_RESOURCES: Resources = {
   stellar_essence: 0,
 };
 
-export const STELLAR_ESSENCE_GOAL = 10_000_000;
+export const STELLAR_ESSENCE_GOAL = 1_000_000;
 
 // The initial configuration for all available upgrades in the game.
 export const UPGRADES_CONFIG: Upgrade[] = [
@@ -252,7 +252,7 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     unlocksAt: { owned: { quantum_forge: 10 }, resources: { dyson_fragments: 1000 } },
     baseCost: { parts: 100000, dyson_fragments: 500, energy: 50000, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
     cost: { parts: 100000, dyson_fragments: 500, energy: 50000, ore: 0, research_points: 0, condensed_fragments: 0, stellar_essence: 0 },
-    costMultiplier: 1.30,
+    costMultiplier: 1.25,
     production: { condensed_fragments: 0.5 },
     consumption: { energy: 2500, dyson_fragments: 1 },
     owned: 0,
@@ -264,9 +264,9 @@ export const UPGRADES_CONFIG: Upgrade[] = [
     name: 'Stellar Forge',
     description: 'The ultimate achievement in engineering. Forges Condensed Fragments into pure Stellar Essence.',
     unlocksAt: { owned: { fragment_condenser: 5 }, resources: { condensed_fragments: 100 } },
-    baseCost: { parts: 2500000, dyson_fragments: 0, energy: 250000, ore: 0, research_points: 0, condensed_fragments: 250, stellar_essence: 0 },
-    cost: { parts: 2500000, dyson_fragments: 0, energy: 250000, ore: 0, research_points: 0, condensed_fragments: 250, stellar_essence: 0 },
-    costMultiplier: 1.35,
+    baseCost: { parts: 1000000, dyson_fragments: 0, energy: 250000, ore: 0, research_points: 0, condensed_fragments: 100, stellar_essence: 0 },
+    cost: { parts: 1000000, dyson_fragments: 0, energy: 250000, ore: 0, research_points: 0, condensed_fragments: 100, stellar_essence: 0 },
+    costMultiplier: 1.3,
     production: { stellar_essence: 0.1 },
     consumption: { energy: 10000, condensed_fragments: 1 },
     owned: 0,
@@ -524,7 +524,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Global Production Boost',
         description: (_level, value) => `Increases all resource production by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 20,
-        cost: level => 2 + Math.floor(Math.pow(level, 1.8) * 2),
+        cost: level => 1 + Math.floor(Math.pow(level, 1.5)),
         type: 'production_multiplier',
         target: 'all',
         value: level => 1 + level * 0.05, // +5% per level
@@ -534,7 +534,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Click Power',
         description: (_level, value) => `Increases manual click power by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 10,
-        cost: level => Math.round(2 * Math.pow(2.2, level)),
+        cost: level => 2 * (level + 1),
         type: 'click_multiplier',
         target: 'click',
         value: level => 1 + level * 0.25, // +25% per level
@@ -544,7 +544,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Engineering Efficiency',
         description: (_level, value) => `Reduces the cost of all buildings by ${(100 - value * 100).toFixed(1)}%.`,
         maxLevel: 10,
-        cost: level => 10 + Math.floor(Math.pow(level, 2.5)),
+        cost: level => 5 + Math.floor(Math.pow(level, 2)),
         type: 'cost_reduction',
         target: 'all_buildings',
         value: level => 1 - level * 0.025, // -2.5% per level
@@ -554,7 +554,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Geological Survey',
         description: (_level, value) => `Start each prestige with ${value.toLocaleString()} extra ore.`,
         maxLevel: 5,
-        cost: level => Math.round(Math.pow(2, level)),
+        cost: level => 1 * (level + 1),
         type: 'production_multiplier', // Note: This is a special case handled in prestige logic
         target: 'starting_ore',
         value: level => level * 100, // +100 ore per level
@@ -564,7 +564,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Mining Guild Charter',
         description: (_level, value) => `Increases production of all 'miner' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 15,
-        cost: level => 3 + Math.floor(Math.pow(level, 1.9)),
+        cost: level => 2 + level,
         type: 'production_multiplier',
         target: 'miner',
         value: level => 1 + level * 0.1, // +10% per level
@@ -574,7 +574,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Energy Grid Optimization',
         description: (_level, value) => `Increases production of all 'power' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 15,
-        cost: level => 3 + Math.floor(Math.pow(level, 1.9)),
+        cost: level => 2 + level,
         type: 'production_multiplier',
         target: 'power',
         value: level => 1 + level * 0.1, // +10% per level
@@ -584,7 +584,7 @@ export const PRESTIGE_UPGRADES_CONFIG: PrestigeUpgrade[] = [
         name: 'Factory Overclock',
         description: (_level, value) => `Increases production of all 'factory' type buildings by ${((value - 1) * 100).toFixed(0)}%.`,
         maxLevel: 15,
-        cost: level => 3 + Math.floor(Math.pow(level, 1.9)),
+        cost: level => 2 + level,
         type: 'production_multiplier',
         target: 'factory',
         value: level => 1 + level * 0.1, // +10% per level

@@ -12,7 +12,7 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onOpenOptions, onOpenH
       {/* OptionsMenu is now managed by App.tsx */}
       <div className="w-full h-full flex items-center justify-center p-4">
         <div className="text-center p-10 bg-black/40 backdrop-blur-md rounded-lg shadow-2xl glow-cyan-lg border border-cyan-500/50 clip-corner">
-          <h1 className="text-6xl font-black text-cyan-300 mb-4 tracking-wider uppercase" style={{ textShadow: '0 0 10px var(--color-primary)'}}>Project Dyson</h1>
+          <h1 className="text-6xl font-black text-cyan-300 mb-4 tracking-wider uppercase" style={{ textShadow: '0 0 10px var(--color-primary)'}}>The Stellar Forge</h1>
           <p className="text-lg text-gray-300 mb-8">Click your way to an industrial empire.</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button
