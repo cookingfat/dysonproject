@@ -6,9 +6,15 @@ import { Resources, ResourceType } from "./types";
  * @returns A formatted string.
  */
 export const formatNumber = (num: number): string => {
-    if (num === null || num === undefined) return '0.00';
-    if (num === 0) return '0.00';
-    if (Math.abs(num) < 1000) return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (num === null || num === undefined) return '0';
+    if (num === 0) return '0';
+
+    if (Math.abs(num) < 1000) {
+        if (Number.isInteger(num)) {
+            return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+        }
+        return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
     
     const abbreviations = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc"];
     const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
