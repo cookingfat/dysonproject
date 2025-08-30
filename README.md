@@ -65,14 +65,19 @@ LocalStorage Save System – Automatic periodic saves + export/import
 
 📦 Getting Started
 1. Clone the Repository
+   
 git clone https://github.com/cookingfat/dysonproject.git
+
 cd dysonproject
 
-2. Install Dependencies
+3. Install Dependencies
+   
 npm install
 
-3. Run the Development Server
+4. Run the Development Server
+   
 npm run dev
+
 Visit http://localhost:5173
 
 🎮 Gameplay
