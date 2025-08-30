@@ -861,7 +861,7 @@ const App: React.FC = () => {
           activeBoosts={activeBoosts}
           cooldowns={cooldowns}
           onActivateAbility={handleActivateAbility}
-          onOpenOptions={() => setIsOptionsOpen(false)}
+          onOpenOptions={() => setIsOptionsOpen(true)}
           onOpenHelp={() => setIsHelpOpen(true)}
           calculatedPPS={calculatedPPS}
           calculatedCPS={calculatedCPS}
