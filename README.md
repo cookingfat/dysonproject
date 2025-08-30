@@ -1,20 +1,67 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+<p align="center">
+  <img src="https://img.shields.io/badge/-🌌%20The%20Stellar%20Forge-00e5ff?style=for-the-badge&logo=starship&logoColor=9e00ff&labelColor=0a0f1e&color=0a0f1e" />
+  <br />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38bdf8?style=for-the-badge&logo=tailwind-css&logoColor=white" />
+</p>
 
-# Run and deploy your AI Studio app
+🌌 The Stellar Forge
 
-This contains everything you need to run your app locally.
+An incremental space industry builder where you click, automate, and research your way to forging stellar power. Harness cosmic energy, mine asteroids, build factories, and ascend through prestige to reach the ultimate goal: Stellar Essence.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1F4iFiVhcLvjeox88QziDHEWWegea_iWW
+🚀 Features
 
-## Run Locally
+Core Loop
 
-**Prerequisites:**  Node.js
+Click to mine ore
 
+Build upgrades and factories to automate resource generation
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Balance energy, ore, parts, and research points
+
+Level up upgrades for exponential scaling
+
+Research & Tech Tree 🔬
+Unlock permanent improvements and synergies between industries.
+
+Prestige System 🌠
+Reset your progress to collect Dyson Fragments, earning permanent prestige upgrades and accelerating future runs.
+
+Dynamic Events
+
+Abilities: Activate powerful boosts like Overcharge or Rapid Research
+
+Random Events: Survive meteor showers, solar flares, and other cosmic phenomena
+
+Clickable Events: Grab fleeting bonuses such as Rich Veins for massive click power
+
+Achievements 🏆
+Unlock milestones that track your journey.
+
+Victory Condition 🏅
+Amass enough Stellar Essence to complete the Stellar Forge and win the game.
+
+Offline Progression ⏳
+Accumulate up to 8 hours of offline gains while you’re away.
+
+Immersive UI & Sound 🎶
+
+Futuristic neon visuals powered by Tailwind CSS
+
+Custom cursors and glowing animations
+
+Background music and satisfying SFX
+
+🛠️ Tech Stack
+
+React + TypeScript – Core game framework
+
+Tailwind CSS – Futuristic neon UI styling
+
+Custom CSS Animations – Starfields, glows, and notifications
+
+LocalStorage Save System – Automatic periodic saves + export/import
+
+📦 Getting Started
+1. Clone the Repository
