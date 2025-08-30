@@ -3,13 +3,17 @@ import { Resources, ResourceType } from "./types";
 /**
  * Formats a number into a more readable string with abbreviations (K, M, B, etc.).
  * @param num The number to format.
+ * @param options.forceDecimals - If true, always show two decimal places for numbers under 1000.
  * @returns A formatted string.
  */
-export const formatNumber = (num: number): string => {
+export const formatNumber = (num: number, options: { forceDecimals?: boolean } = {}): string => {
     if (num === null || num === undefined) return '0';
-    if (num === 0) return '0';
+    if (num === 0) return options.forceDecimals ? '0.00' : '0';
 
     if (Math.abs(num) < 1000) {
+        if (options.forceDecimals) {
+            return num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
         if (Number.isInteger(num)) {
             return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
         }
@@ -26,11 +30,6 @@ export const formatNumber = (num: number): string => {
     const suffix = abbreviations[tier];
     const scale = Math.pow(10, tier * 3);
     const scaled = num / scale;
-
-    // Use toLocaleString for numbers less than 1K to get commas, but format others manually.
-    if (scaled >= 1000) {
-        return num.toLocaleString(undefined, { maximumFractionDigits: 0});
-    }
 
     return scaled.toFixed(2) + suffix;
 };

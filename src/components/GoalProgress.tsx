@@ -16,7 +16,7 @@ const GoalProgress: React.FC<GoalProgressProps> = ({ current, goal }) => {
         <h2 className="text-xl font-bold text-purple-300 uppercase tracking-wider">Stellar Essence Goal</h2>
         <Tooltip content={`${current.toLocaleString()} / ${goal.toLocaleString()}`} position="top">
             <p className="font-mono text-xl text-purple-200">
-                {formatNumber(current)} / {formatNumber(goal)}
+                {formatNumber(current, { forceDecimals: true })} / {formatNumber(goal)}
             </p>
         </Tooltip>
       </div>

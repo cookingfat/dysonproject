@@ -61,10 +61,10 @@ const ResourceDisplay: React.FC<ResourceDisplayProps> = ({ resources, rps, resou
                 <div key={resourceKey} className={`bg-black/40 p-2 rounded-md clip-corner-sm border border-gray-700/50 ${isFlashing ? 'animate-flash' : ''}`}>
                     <h2 className={`text-base ${meta.color} font-bold truncate flex items-center justify-center gap-2`}>{meta.icon} {meta.name}</h2>
                     <Tooltip content={resourceAmount.toLocaleString()} position="bottom">
-                      <p className="text-xl font-bold text-white font-mono">{formatNumber(resourceAmount)}</p>
+                      <p className="text-xl font-bold text-white font-mono">{formatNumber(resourceAmount, { forceDecimals: true })}</p>
                     </Tooltip>
                     <p className={`text-sm ${rpsColor} font-mono ${rpsGlowClass}`}>
-                        {resourceRps >= 0 ? '+' : ''}{formatNumber(resourceRps)}/s
+                        {resourceRps >= 0 ? '+' : ''}{formatNumber(resourceRps, { forceDecimals: true })}/s
                     </p>
                 </div>
             )

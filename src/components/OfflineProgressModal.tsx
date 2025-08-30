@@ -32,7 +32,7 @@ const OfflineProgressModal: React.FC<OfflineProgressModalProps> = ({ gains, onCl
             return (
               <div key={key} className="flex justify-between items-center">
                 <span className={`font-semibold ${meta.color} flex items-center gap-2`}>{meta.icon} {meta.name}:</span>
-                <span className="font-mono text-white" title={amount.toLocaleString()}>+ {formatNumber(amount)}</span>
+                <span className="font-mono text-white" title={amount.toLocaleString()}>+ {formatNumber(amount, { forceDecimals: true })}</span>
               </div>
             );
           })}
